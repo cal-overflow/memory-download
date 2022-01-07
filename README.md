@@ -9,6 +9,7 @@ This simple JavaScript application allows you to say goodbye to the service by d
 1. [NodeJS](http://nodejs.org) (v17.1.0)
 2. [npm](http://npmjs.com)
 3. [nvm](http://nvm.sh/)
+4. [FFmpeg](https://www.ffmpeg.org/) Video 
 
 ### Steps
 <!-- no toc -->
@@ -60,5 +61,15 @@ Start the program with `npm`:
 ```bash
 npm start
 ```
+
+Optionally, you can start the program with optional arguments:
+```bash
+npm start -- <arguments>
+```
+
+The current available options are:
+
+ - `-organize-years` - Save memories in subdirectories corresponding to the year they were created.
+
 
 Wait for the program to terminate. You will now find a copy of your memories in the folder `memory-download/memories/`.

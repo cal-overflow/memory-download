@@ -1,50 +1,23 @@
-import fetch from 'node-fetch';
-import fs from 'fs';
+import {
+  downloadPhotos,
+  downloadVideos
+} from './services/downloadServices.js';
+import {
+  initializeEnvironment,
+  getMemoryDataFromJSON,
+} from './services/fileServices.js';
 
-const inputFile = './memories_history.json';
-const outputDirectory = './memories';
+initializeEnvironment();
 
-if (!fs.existsSync(inputFile))
-  throw new Error(`JSON file "${inputFile}" not found`);
+const data = getMemoryDataFromJSON();
+const memories = data['Saved Media'].reverse();
 
-if (!fs.existsSync(outputDirectory))
-  fs.mkdirSync(outputDirectory);
+console.log('Downloading your memories. This will take a while...');
 
-const data = JSON.parse(fs.readFileSync(inputFile));
-const memories = data["Saved Media"].reverse();
+const photos = memories.filter((memory) => memory['Media Type'] === 'PHOTO');
+await downloadPhotos(photos);
 
-const getFileName = async (memory) => {
-  const extension = memory['Media Type'] === 'PHOTO' ? 'jpg' : 'mp4';
-  const filename = memory['Date'].substr(0, 10);
+const videos = memories.filter((memory) => memory['Media Type'] === 'VIDEO')
+await downloadVideos(videos);
 
-  let i = 1;
-  let confirmedFilename = filename;
-  while (fs.existsSync(`${outputDirectory}/${confirmedFilename}.${extension}`)) {
-    confirmedFilename = `${filename}(${i++})`;
-  }
-
-  return `${outputDirectory}/${confirmedFilename}.${extension}`;
-};
-
-console.log("Downloading your memories. This will probably take a while...");
-
-for (const memory of memories) {
-  await fetch((memory['Download Link']), {
-    method: 'POST'
-  })
-  .then(async (res) => {
-    const url = await res.text();
-  
-    // download file from url
-    const download = await fetch(url);
-    const fileStream = fs.createWriteStream(await getFileName(memory));
-
-    await new Promise((resolve, reject) => {
-      download.body.pipe(fileStream);
-      download.body.on("error", reject);
-      fileStream.on("finish", resolve);
-    });
-  });
-}
-
-console.log(`Memories downloaded successfully!\nYour memories are stored in ${outputDirectory}`);
+console.log(`Memories downloaded successfully!\nYour memories are stored in ${outputDirectory}.`);
