@@ -70,6 +70,7 @@ npm start -- <arguments>
 The current available options are:
 
  - `-organize-years` - Save memories in subdirectories corresponding to the year they were created.
+ - `-archive` - Compress your memories into a `.zip` folder
 
 
 Wait for the program to terminate. You will now find a copy of your memories in the folder `memory-download/memories/`.
