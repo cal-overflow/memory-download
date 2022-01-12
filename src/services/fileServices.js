@@ -3,7 +3,7 @@ import admZip from 'adm-zip';
 import path from 'path';
 
 const subdirEnabled = process.argv.includes('-organize-years');
-const constants = JSON.parse(fs.readFileSync('./constants.json'));
+const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
 const inputFile = './memories_history.json';
 const outputDirectory = './memories';
 

@@ -2,7 +2,7 @@
   "name": "memory-download",
   "version": "1.0.0",
   "scripts": {
-    "start": "node app.js"
+    "start": "node src/app.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.9",
