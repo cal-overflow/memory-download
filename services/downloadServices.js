@@ -6,7 +6,7 @@ import {writeFile, getFileName, updateFileMetadata} from './fileServices.js';
 const videoConcat = videoStitch.concat;
 
 const checkVideoClip = (prev, cur) => {
-  if (prev['Media Type'] !== 'VIDEO' || cur['Media Type'] !== 'VIDEO')
+  if (prev['Media Type'] !== 'Video' || cur['Media Type'] !== 'Video')
     return false;
   
   if (prev.Date.substring(0, 13) !== prev.Date.substring(0, 13)) 
@@ -55,7 +55,7 @@ const downloadPhotos = async (photos) => {
     const download = await fetch(url);
     const fileName = await getFileName(photo);
 
-    writeFile(fileName, download.body);
+    await writeFile(fileName, download.body);
     updateFileMetadata(fileName, photo);
   }
 };
@@ -101,7 +101,7 @@ const downloadVideos = async (videos) => {
     const download = await fetch(url);
     fileName = await getFileName(video);
 
-    writeFile(fileName, download.body);
+    await writeFile(fileName, download.body);
     updateFileMetadata(fileName, video);
 
     prevUrl = url;
