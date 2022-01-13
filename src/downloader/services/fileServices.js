@@ -8,9 +8,7 @@ const socketId = process.argv[process.argv.findIndex((val) => val === '-socket')
 const distributionDirectory = './src/website/static/archive';
 const outputDirectory = `memories/${socketId}`;
 
-const getMemoryDataFromJSON = () =>
-  JSON.parse(fs.readFileSync(inputFile));
-
+const getMemoryDataFromJSON = () => JSON.parse(fs.readFileSync(inputFile));
 const getOutputDirectory = () => `memories/${socketId}`;
 
 const initializeEnvironment = () => {

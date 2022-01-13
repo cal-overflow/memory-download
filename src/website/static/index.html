@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Memory Download</title>
+    <title>Download Snapchat Memories</title>
     <meta charset="UTF-8">
     <meta content="description" data="Download all of your Snapchat memories with ease" />
     <meta content="keywords" data="Snapchat, Memory, Memories, Download" />
@@ -17,6 +17,22 @@
       .bg-snap-yellow {
         background-color: #FFFC00;
       }
+      tt {
+        background-color: rgb(50, 50, 50);
+        color: white;
+        border-radius: 3px;
+        padding: 2px;
+      }
+      .btn {
+        border-radius: 3px;
+      }
+      .btn:hover, .btn:focus {
+        outline: none;
+        box-shadow: none;
+      }
+      .btn:hover {
+        filter: drop-shadow(1px 1px 1px rgb(50, 50, 50));
+      }
     </style>
   </head>
   <body class="bg-dark" onload="document.getElementById('form').reset();">
@@ -27,46 +43,55 @@
         <h4>Download all of your Snapchat memories with ease</h4>
       </div>
       
-      <div class="container-sm px-5 min-vh-50" style="min-height: 50vh;">
+      <div class="container-sm px-5 min-vh-50" style="min-height: 40vh;">
         <div id="steps-card">
           <div id="step-0">
+            <p>
+              Want a copy of all your Snapchat memories? You're in the right place!
+              <br />
+              This website allows you to download a copy of your memories to your computer all at once. It takes 5 simple steps.
+            </p>
+
             <h4>Steps</h4>
             <ol>
-              <li>Download your snapchat data</li>
-              <li>Find and unzip your Snapchat data</li>
+              <li>Download your Snapchat data</li>
+              <li>Find and uncompress (unzip) your Snapchat data</li>
               <li>Upload your <tt>memories_history.json</tt> file</li>
+              <li>Wait while your memories are prepared for you</li>
+              <li>Download your memories!</li>
             </ol>
           </div>
           
           <div id="step-1" class="d-none">
-            <h4>Step 1: Download your snapchat data</h4>
+            <h4>Step 1: Download your Snapchat data</h4>
 
             <p>
               Snapchat makes downloading your data very simple!
 
               <ol>
-                <li>Sign into your Snapchat account at <a href="https://accounts.snapchat.com" target="_blank">accounts.snapchat.com</a></li>
+                <li>Sign into your Snapchat account at <a href="https://accounts.snapchat.com" target="_blank" class="text-dark">accounts.snapchat.com</a></li>
                 <li>Click <strong>My Data</strong></li>
                 <li>Click <strong>Submit Request</strong> at the bottom of the page</li>
                 <li>Wait for an email from Snapchat with a link to your data archive. (This may take as long as a day)</li>
                 <li>Follow the link found in your email and follow the given instructions to download your data</li>
               </ol>
 
-              Need more help downloading your data? Visit the official <a href="https://support.snapchat.com/en-US/a/download-my-data" target="_blank">Download my Data</a> Snapchat support page
+              <small>Need more help downloading your data? Visit the official <a href="https://support.snapchat.com/en-US/a/download-my-data" target="_blank" class="text-dark">Download my Data</a> Snapchat support page.</small>
             </p>
           </div>
 
           <div id="step-2" class="d-none">
-            <h4>Step 2: Find and unzip your Snapchat data</h4>
+            <h4>Step 2: Find and uncompress (unzip) your Snapchat data</h4>
 
             <p>
-              Unzipping the file allows you access to the specific data needed to download your memories.
+              Unzipping the file allows you access to the specific file needed to download your memories.
 
               <ol>
-                <li>Find the <tt>mydata~#############.zip</tt> file downloaded in the previous step</li>
+                <li>Find the <tt>mydata~###.zip</tt> file downloaded in the previous step</li>
                 <li>Unzip the file</li>
-                <li>Open the unzipped folder</li>
               </ol>
+
+              <small>The <tt>###</tt> represents the download number provided by Snapchat</small>
             </p>
           </div>
 
@@ -83,42 +108,56 @@
               </form>
               <p><small>Hint: You can find the file within the <tt>json</tt> folder</small></p>
           </div>
-          <button id="nav-button" class="btn-dark rounded float-right mb-2">Continue</button>
-        </div>
 
-        <div id="wait-card" class="container-md text-center d-none">
-          <p id="message">Downloading your memories...</p>
-          <div class="progress">
-            <div id="progress-bar" class="progress-bar bg-dark" role="progressbar" style="width: 0%"></div>
+          <div id="step-4" class="container-md d-none">
+            <h4>Step 4: Wait while your memories are prepared for you</h4>
+            <div class="text-center">
+              <p id="message">Downloading your memories...</p>
+              <div class="progress">
+                <div id="progress-bar" class="progress-bar bg-dark" role="progressbar" style="width: 0%"></div>
+              </div>
+              <p class="d-none"id="percent">0%</p>
+    
+              <p>
+                <small>
+                  This will take a while
+                  <br />
+                  Do not close this tab
+                </small>
+              </p>
+            </div>
           </div>
-          <p class="d-none"id="percent">0%</p>
+    
+          <div id="step-5" class="container-md d-none">
+            <h4>Step 5: Download your memories!</h4>
+            <div class="text-center">
+              <h4>Your download is ready</h4>
+              <p id="download-text"></p>
+              <p><small>This link will expire in an hour</small></p>
+            </div>
+          </div>
 
-          <p>
-            <small>
-              This will take a while
-              <br />
-              Do not close this tab
-            </small>
-          </p>
-        </div>
-  
-        <div id="done-card" class="container-md text-center d-none">
-          <h4>Your download is ready</h4>
-          <p id="download-text"></p>
-          <p><small>This link will expire in an hour</small></p>
+          <button id="nav-button" class="btn btn-dark mb-2">Get Started</button>
         </div>
 
         <div id="error-card" class="container-md text-center d-none">
           <h4>Uh oh</h4>
           <p id="error-text"></p>
-          <p><a href="index.html">Try again</a></p>
+          <button id="try-again-button" onclick="location.reload();" class="btn btn-dark mb-2">Try again</button>
         </div>
       </div>
 
     </div>
-    <div id="footer" class="container-fluid text-center bg-dark text-light py-4">
+    
+    <div id="tutorial" class="bg-snap-yellow text-center container-fluid py-2">
       <p>
-        <a href="http://www.christianlisle.com" target="_blank" class="text-light">Christian Lisle</a>
+        <a href="" target="_blank" class="text-dark">Watch a tutorial</a>
+      </p>
+    </div>
+
+    <div id="footer" class="container-fluid bg-dark text-center text-light py-4">
+      <p>
+        <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
       </p>
       <p>
         <a href="https://github.com/ChristianLisle/memory-download" target="_blank">
@@ -134,14 +173,15 @@
 <script type="text/javascript">
   const fileUpload = document.getElementById('siofu-input');
   const failMessage = document.getElementById('upload-fail-message');
-  const waitCard = document.getElementById('wait-card');
+  const waitCard = document.getElementById('step-4');
   const progress = document.getElementById('percent');
   const message = document.getElementById('message');
   const errorCard = document.getElementById('error-card');
   const errorText = document.getElementById('error-text');
-  const doneCard = document.getElementById('done-card');
+  const doneCard = document.getElementById('step-5');
   const downloadText = document.getElementById('download-text');
   const navButton = document.getElementById('nav-button');
+  const tutorialCard = document.getElementById('tutorial');
   const progressBar = document.getElementById('progress-bar');
 
   var socket = io();
@@ -155,6 +195,8 @@
       document.getElementById(`step-${step}`).classList.toggle('d-none');
       step++;
       document.getElementById(`step-${step}`).classList.toggle('d-none');
+
+      if (step === 1) navButton.innerHTML = 'Continue';
       
       if (step === 3) navButton.innerHTML = 'Upload';
     }
@@ -162,6 +204,7 @@
     if (step >= 3 && fileUpload.value) {
       navButton.classList.toggle('d-none');
       document.getElementById(`step-3`).classList.toggle('d-none');
+      tutorialCard.classList.add('d-none');
       uploader.submitFiles(fileUpload.files);
     }  
   });
@@ -195,6 +238,8 @@
 
       errorText.innerHTML = msg.error;
       errorCard.classList.remove('d-none');
+      tutorialCard.classList.remove('d-none');
+
     }
     else message.innerHTML = msg;
   });

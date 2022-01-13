@@ -14,7 +14,7 @@ initializeEnvironment();
 const data = getMemoryDataFromJSON();
 
 if (!data['Saved Media']) {
-  process.send({error: 'Unable to parse the file you provided. Please try again with the memories_history.json file.'});
+  process.send({error: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.'});
   process.exit(1);
 }
 

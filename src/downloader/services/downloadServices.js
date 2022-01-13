@@ -51,7 +51,7 @@ const downloadPhotos = async (photos) => {
 
     if (year !== photo.Date.substring(0, 4)) {
       year = photo.Date.substring(0, 4);
-      process.send(`Downloading photos from ${year}.`);
+      process.send(`Processing photos from ${year}.`);
     }
 
     const res = await fetch(photo['Download Link'], {method: 'POST'});
@@ -75,7 +75,7 @@ const downloadVideos = async (videos) => {
 
     if (year !== video.Date.substring(0, 4)) {
       year = video.Date.substring(0, 4);
-      process.send(`Downloading videos from ${year}.`);
+      process.send(`Processing videos from ${year}.`);
     }
 
     const res = await fetch((video['Download Link']), {method: 'POST'});
@@ -101,7 +101,7 @@ const downloadVideos = async (videos) => {
           fs.rmSync(clip.fileName);
       })
       .catch(() => {
-        process.send(`There was an issue combining ${clips.length} clips into a single video file. The video clips will be saved individually.`);
+        process.send(`There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`);
       })
       .finally(() => clips = []);
     }
