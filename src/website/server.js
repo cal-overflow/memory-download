@@ -4,9 +4,7 @@ import { Server } from 'socket.io';
 import siofu from 'socketio-file-upload';
 import fs from 'fs';
 import { exec, fork } from 'child_process';
-import herokuSSLRedirect from 'heroku-ssl-redirect';
-
-const sslRedirect = herokuSSLRedirect.default
+import redirectSSL from 'redirect-ssl';
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
@@ -25,13 +23,16 @@ if (!fs.existsSync(distributionDirectory)) {
 }
 
 const app = express().use(siofu.router);
+app.use(redirectSSL.create({
+  enabled: process.env.NODE_ENV === 'production',
+  statusCode: 301
+}));
+
 const server = http.createServer(app);
 const io = new Server(server);
-
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static('src/website/static'));
-app.use(sslRedirect(['production'], 301)); // enforce 301 HTTPS redirect on production
 
 
 io.on('connection', (socket) => {

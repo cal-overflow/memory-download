@@ -11,8 +11,8 @@
     "express": "^4.17.2",
     "forever": "^4.0.2",
     "fs": "^0.0.1-security",
-    "heroku-ssl-redirect": "^0.1.1",
     "node-fetch": "^3.1.0",
+    "redirect-ssl": "^3.0.0",
     "socket.io": "^4.4.1",
     "socketio-file-upload": "^0.7.3",
     "video-stitch": "^1.7.1"
