@@ -4,7 +4,7 @@ import { Server } from 'socket.io';
 import siofu from 'socketio-file-upload';
 import fs from 'fs';
 import { exec, fork } from 'child_process';
-import enforce from 'express-sslify';
+import sslRedirect from 'heroku-ssl-redirect';
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
@@ -29,7 +29,8 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static('src/website/static'));
-app.use(enforce.HTTPS({ trustProtoHeader: true })); // enforce https
+app.use(sslRedirect(['production'], 301)); // enforce 301 HTTPS redirect on production
+
 
 io.on('connection', (socket) => {
   var uploader = new siofu();
