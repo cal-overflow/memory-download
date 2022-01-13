@@ -4,7 +4,9 @@ import { Server } from 'socket.io';
 import siofu from 'socketio-file-upload';
 import fs from 'fs';
 import { exec, fork } from 'child_process';
-import sslRedirect from 'heroku-ssl-redirect';
+import herokuSSLRedirect from 'heroku-ssl-redirect';
+
+const sslRedirect = herokuSSLRedirect.default
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
