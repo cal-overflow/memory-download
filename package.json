@@ -2,13 +2,23 @@
   "name": "memory-download",
   "version": "1.0.0",
   "scripts": {
-    "start": "node src/app.js"
+    "dev": "nodemon src/website/server.js",
+    "prod": "forever src/website/server.js",
+    "downloader": "node src/downloader/app.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.9",
+    "express": "^4.17.2",
+    "express-sslify": "^1.2.0",
+    "forever": "^4.0.2",
     "fs": "^0.0.1-security",
     "node-fetch": "^3.1.0",
+    "socket.io": "^4.4.1",
+    "socketio-file-upload": "^0.7.3",
     "video-stitch": "^1.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   },
   "type": "module"
 }

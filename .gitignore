@@ -4,3 +4,7 @@ node_modules
 memories
 memories.zip
 memories_history.json
+
+downloads
+
+src/website/static/archive

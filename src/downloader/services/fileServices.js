@@ -2,15 +2,16 @@ import fs from 'fs';
 import admZip from 'adm-zip';
 import path from 'path';
 
-const subdirEnabled = process.argv.includes('-organize-years');
 const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
-const inputFile = './memories_history.json';
-const outputDirectory = './memories';
+const inputFile = process.argv[process.argv.findIndex((val) => val === '-input') + 1];
+const socketId = process.argv[process.argv.findIndex((val) => val === '-socket') + 1];
+const distributionDirectory = './src/website/static/archive';
+const outputDirectory = `memories/${socketId}`;
 
 const getMemoryDataFromJSON = () =>
   JSON.parse(fs.readFileSync(inputFile));
 
-const getOutputDirectory = () => outputDirectory;
+const getOutputDirectory = () => `memories/${socketId}`;
 
 const initializeEnvironment = () => {
   if (!fs.existsSync(inputFile))
@@ -28,16 +29,11 @@ const getFileName = async (memory, isConcatenatedVideo=false) => {
   const day = memory['Date'].substring(8, 10);
   let fileName;
 
-  if (subdirEnabled) {
-    if (!fs.existsSync(`./${outputDirectory}/${year}`)) {
-      fs.mkdirSync(`./${outputDirectory}/${year}`);
-    }
+  if (!fs.existsSync(`./${outputDirectory}/${year}`)) {
+    fs.mkdirSync(`./${outputDirectory}/${year}`);
+  }
 
-    fileName = `${year}/${month}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
-  }
-  else {
-    fileName = `${year}-${month.substring(0, 3)}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
-  }
+  fileName = `${year}/${month}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
 
   let i = 1;
   let confirmedFileName = fileName;
@@ -64,19 +60,23 @@ const updateFileMetadata = (file, memory) => {
 };
 
 const zipFiles = async () => {
-  console.log('Compressing your memories.');
+  process.send('Compressing your memories.');
+  const outputFile = `${distributionDirectory}/${socketId}/memories.zip`;
+
 
   try {
     const zip = new admZip();
-    const outputFile = "memories.zip";
 
-    zip.addLocalFolder("./memories");
+    zip.addLocalFolder(outputDirectory);
     zip.writeZip(outputFile);
 
-    
-    console.log(`An archived copy of your memories are stored in ${zippedFile}.`);
+    console.log(`An archived copy of your memories are stored in ${zippedFile}.`); // TODO: delete
   } catch {
-    console.log('An error occured while compressing your memories.');
+    console.error('An error occured while compressing your memories.'); // TODO: delete
+  }
+
+  if (fs.existsSync(outputFile)) {
+    fs.rmSync(outputDirectory, {recursive: true});
   }
 };
 

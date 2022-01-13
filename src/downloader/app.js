@@ -1,3 +1,4 @@
+
 import {
   downloadPhotos,
   downloadVideos
@@ -5,18 +6,20 @@ import {
 import {
   initializeEnvironment,
   getMemoryDataFromJSON,
-  getOutputDirectory,
   zipFiles
 } from './services/fileServices.js';
-
-const wantsFilesZipped = process.argv.includes('-zip');
 
 initializeEnvironment();
 
 const data = getMemoryDataFromJSON();
-const memories = data['Saved Media'].reverse();
 
-console.log('Downloading your memories. This will take a while...');
+if (!data['Saved Media']) {
+  process.send({error: 'Unable to parse the file you provided. Please try again with the memories_history.json file.'});
+  process.exit(1);
+}
+
+const memories = data['Saved Media'].reverse();
+process.send({total: memories.length});
 
 const photos = memories.filter((memory) => memory['Media Type'] === 'Image');
 await downloadPhotos(photos);
@@ -24,12 +27,6 @@ await downloadPhotos(photos);
 const videos = memories.filter((memory) => memory['Media Type'] === 'Video')
 await downloadVideos(videos);
 
-console.log(`Memories downloaded successfully!`);
+await zipFiles();
 
-if (wantsFilesZipped) {
-  await zipFiles();
-  console.log(`There is an unarchvied copy of your memories in ${getOutputDirectory()}.`);
-}
-else {
-  console.log(`Your memories are stored in ${getOutputDirectory()}.`);
-}
+process.send('Done!');
