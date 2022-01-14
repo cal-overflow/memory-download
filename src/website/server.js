@@ -36,6 +36,7 @@ app.use(express.static('src/website/static'));
 
 
 io.on('connection', (socket) => {
+  io.emit('activeConnections', io.engine.clientsCount);
   var uploader = new siofu();
   uploader.dir = downloadDirectory;
   uploader.listen(socket);
@@ -85,6 +86,8 @@ io.on('connection', (socket) => {
     if (socket.process) {
       socket.process.kill('SIGINT')
     }
+
+    io.emit('activeConnections', io.engine.clientsCount);
   });
 });
 
