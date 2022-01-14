@@ -5,6 +5,7 @@ import siofu from 'socketio-file-upload';
 import fs from 'fs';
 import { exec, fork } from 'child_process';
 import redirectSSL from 'redirect-ssl';
+import expressGoogleAnalytics from'express-google-analytics';
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
@@ -27,6 +28,11 @@ app.use(redirectSSL.create({
   enabled: process.env.NODE_ENV === 'production',
   statusCode: 301
 }));
+
+const trackingId = process.env.ANALYTICS_TRACKING_ID;
+if (trackingId) {
+  app.use(expressGoogleAnalytics(trackingId));
+}
 
 const server = http.createServer(app);
 const io = new Server(server);
