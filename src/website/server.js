@@ -6,6 +6,8 @@ import fs from 'fs';
 import { exec, fork } from 'child_process';
 import redirectSSL from 'redirect-ssl';
 
+const isDebugging = process.env.DEBUG_MODE;
+
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
 const distributionDirectory = './src/website/static/archive';
@@ -34,8 +36,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static('src/website/static'));
 
-
 io.on('connection', (socket) => {
+  if (isDebugging) console.log(`[${socket.id}] Socket connected`);
+
   var uploader = new siofu();
   uploader.dir = downloadDirectory;
   uploader.listen(socket);
@@ -50,20 +53,33 @@ io.on('connection', (socket) => {
       if (!fs.existsSync(socket.downloadFolder))
         fs.mkdirSync(socket.downloadFolder);
 
-
+      
       // Spin up child process
-      socket.process = fork('src/downloader/app.js', ['-input', socket.file, '-socket', socket.id]);
+      const downloaderArguments = ['-input', socket.file, '-socket', socket.id];
 
-      socket.process.on('message', (msg) => {
-        socket.emit('message', msg);
+      if (isDebugging) {
+        console.log(`[${socket.id}] Starting child process`);
+        downloaderArguments.push('-debug');
+      }
+
+      socket.process = fork('src/downloader/app.js', downloaderArguments);
+      
+      socket.process.on('message', (data) => {
+        if (isDebugging && data.debug) {
+          console.log(`[${socket.id}][CHILD] ${data.debug}`);
+        }
+        else socket.emit('message', data);
       });
 
       socket.process.on('close', (code) => {
+        if (isDebugging) console.log(`[${socket.id}][CHILD] Process exited with code ${code}`);
+
         if (code === 0) {
           socket.emit('downloadLink', `archive/${socket.id}/memories.zip`);
         }
         
         setTimeout(() => {
+          if (isDebugging) console.log(`[${socket.id}] One hour has passed... deleting archive`);
           exec(`rm -rf src/website/static/archive/${socket.id}`);
         }, 3600000);
       });
@@ -78,6 +94,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
+    if (isDebugging) console.log(`[${socket.id}] Socket disconnected`);
+
     if (fs.existsSync(socket.file)) {
       fs.rmSync(socket.file);
     }

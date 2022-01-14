@@ -14,12 +14,14 @@ initializeEnvironment();
 const data = getMemoryDataFromJSON();
 
 if (!data['Saved Media']) {
+  process.send({debug: 'Invalid input file detected'});
   process.send({error: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.'});
   process.exit(1);
 }
 
 const memories = data['Saved Media'].reverse();
 process.send({total: memories.length});
+process.send({debug: `Processing ${memories.length} memories`});
 
 const photos = memories.filter((memory) => memory['Media Type'] === 'Image');
 await downloadPhotos(photos);
@@ -29,4 +31,4 @@ await downloadVideos(videos);
 
 await zipFiles();
 
-process.send('Done!');
+process.send({message: 'Done!'});

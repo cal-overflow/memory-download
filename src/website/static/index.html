@@ -221,27 +221,27 @@
     waitCard.classList.remove('d-none')
   });
 
-  socket.on('message', (msg) => {
-    if (msg.total) {
+  socket.on('message', (data) => {
+    if (data.total) {
       progress.classList.remove('d-none');
 
-      total = msg.total;
+      total = data.total;
     }
-    else if (msg.count) {
-      const percent = `${parseInt((msg.count / total) * 100)}%`;
+    else if (data.count) {
+      const percent = `${parseInt((data.count / total) * 100)}%`;
       progressBar.style.width = percent;
       progress.innerHTML = percent;
       
     }
-    else if (msg.error) {
+    else if (data.error) {
       waitCard.classList.add('d-none');
 
-      errorText.innerHTML = msg.error;
+      errorText.innerHTML = data.error;
       errorCard.classList.remove('d-none');
       tutorialCard.classList.remove('d-none');
 
     }
-    else message.innerHTML = msg;
+    else message.innerHTML = data.message || '';
   });
 
   socket.on('downloadLink', (link) => {
