@@ -101,10 +101,15 @@ const downloadVideos = async (videos) => {
         for (const clip of clips)
           fs.rmSync(clip.fileName);
       })
-      .catch((error) => {
+      .catch((err) => {
         process.send({message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`});
 
-        if (isDebugging) process.send({debug: `Error caught while trying to combine clips:\n${error.message}`});
+        if (isDebugging) {
+          if (err) {
+            process.send({debug: `An error occurred while trying to combine video clips. Error:\n${err.message}`});
+          }
+          else process.send({debug: 'An unknown error occurred while trying to combine video clips'});
+        }
       })
       .finally(() => clips = []);
     }
