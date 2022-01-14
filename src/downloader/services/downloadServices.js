@@ -4,6 +4,7 @@ import videoStitch from 'video-stitch';
 import {writeFile, getFileName, updateFileMetadata} from './fileServices.js';
 
 const videoConcat = videoStitch.concat;
+const isDebugging = process.argv.includes('-debug');
 
 const checkVideoClip = (prev, cur) => {
   if (prev['Media Type'] !== 'Video' || cur['Media Type'] !== 'Video')
@@ -51,7 +52,7 @@ const downloadPhotos = async (photos) => {
 
     if (year !== photo.Date.substring(0, 4)) {
       year = photo.Date.substring(0, 4);
-      process.send(`Processing photos from ${year}.`);
+      process.send({message: `Processing photos from ${year}.`});
     }
 
     const res = await fetch(photo['Download Link'], {method: 'POST'});
@@ -75,7 +76,7 @@ const downloadVideos = async (videos) => {
 
     if (year !== video.Date.substring(0, 4)) {
       year = video.Date.substring(0, 4);
-      process.send(`Processing videos from ${year}.`);
+      process.send({message: `Processing videos from ${year}.`});
     }
 
     const res = await fetch((video['Download Link']), {method: 'POST'});
@@ -100,8 +101,10 @@ const downloadVideos = async (videos) => {
         for (const clip of clips)
           fs.rmSync(clip.fileName);
       })
-      .catch(() => {
-        process.send(`There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`);
+      .catch((error) => {
+        process.send({message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`});
+
+        if (isDebugging) process.send({debug: `Error caught while trying to combine clips:\n${error.message}`});
       })
       .finally(() => clips = []);
     }

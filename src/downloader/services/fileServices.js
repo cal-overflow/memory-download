@@ -3,6 +3,7 @@ import admZip from 'adm-zip';
 import path from 'path';
 
 const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
+const isDebugging = process.argv.includes('-debug');
 const inputFile = process.argv[process.argv.findIndex((val) => val === '-input') + 1];
 const socketId = process.argv[process.argv.findIndex((val) => val === '-socket') + 1];
 const distributionDirectory = './src/website/static/archive';
@@ -58,9 +59,8 @@ const updateFileMetadata = (file, memory) => {
 };
 
 const zipFiles = async () => {
-  process.send('Compressing your memories.');
+  process.send({message: 'Compressing your memories.'});
   const outputFile = `${distributionDirectory}/${socketId}/memories.zip`;
-
 
   try {
     const zip = new admZip();
@@ -68,9 +68,9 @@ const zipFiles = async () => {
     zip.addLocalFolder(outputDirectory);
     zip.writeZip(outputFile);
 
-    console.log(`An archived copy of your memories are stored in ${zippedFile}.`); // TODO: delete
+    if (isDebugging) process.send({debug: `Memories successfully compressed at ${outputFile}.`});
   } catch {
-    console.error('An error occured while compressing your memories.'); // TODO: delete
+    if (isDebugging) process.send({debug: `An error occured while compressing memories to ${outputFile}`});
   }
 
   if (fs.existsSync(outputFile)) {
