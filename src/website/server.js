@@ -34,7 +34,11 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('src/website/static'));
+app.use('/', express.static('src/website/static'));
+
+app.get('/*', (req, res) => {
+  res.redirect('/');
+});
 
 io.on('connection', (socket) => {
   if (isDebugging) console.log(`[${socket.id}] Socket connected`);
