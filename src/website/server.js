@@ -5,7 +5,6 @@ import siofu from 'socketio-file-upload';
 import fs from 'fs';
 import { exec, fork } from 'child_process';
 import redirectSSL from 'redirect-ssl';
-import expressGoogleAnalytics from'express-google-analytics';
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
@@ -29,11 +28,6 @@ app.use(redirectSSL.create({
   statusCode: 301
 }));
 
-const trackingId = process.env.ANALYTICS_TRACKING_ID;
-if (trackingId) {
-  app.use(expressGoogleAnalytics(trackingId));
-}
-
 const server = http.createServer(app);
 const io = new Server(server);
 const PORT = process.env.PORT || 3000;
@@ -42,7 +36,6 @@ app.use(express.static('src/website/static'));
 
 
 io.on('connection', (socket) => {
-  io.emit('activeConnections', io.engine.clientsCount);
   var uploader = new siofu();
   uploader.dir = downloadDirectory;
   uploader.listen(socket);
@@ -92,8 +85,6 @@ io.on('connection', (socket) => {
     if (socket.process) {
       socket.process.kill('SIGINT')
     }
-
-    io.emit('activeConnections', io.engine.clientsCount);
   });
 });
 

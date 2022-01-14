@@ -41,7 +41,6 @@
         <img src="ghostlogo.svg" width="80" height="80" />
         <h1><strong>Memory Download</strong></h1>
         <h4>Download all of your Snapchat memories with ease</h4>
-        <h6 id="current-user-count-message" class="invisible my-0"><span id="active-connections"></span> current users</h6>
       </div>
       
       <div class="container-sm px-5 min-vh-50" style="min-height: 40vh;">
@@ -181,8 +180,6 @@
   const errorText = document.getElementById('error-text');
   const doneCard = document.getElementById('step-5');
   const downloadText = document.getElementById('download-text');
-  const activeUserCount = document.getElementById('active-connections');
-  const currentUserCountMessage = document.getElementById('current-user-count-message');
   const navButton = document.getElementById('nav-button');
   const tutorialCard = document.getElementById('tutorial');
   const progressBar = document.getElementById('progress-bar');
@@ -256,16 +253,6 @@
     hyperlink.innerHTML = 'Download';
 
     downloadText.appendChild(hyperlink);
-  });
-
-  socket.on('activeConnections', (count) => {
-    activeUserCount.innerHTML = count;
-    if (count > 1) {
-      currentUserCountMessage.classList.remove('invisible');
-    }
-    else {
-      currentUserCountMessage.classList.add('invisible');
-    }
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
