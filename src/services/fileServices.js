@@ -1,6 +1,6 @@
 import fs from 'fs';
-import admZip from 'adm-zip';
 import path from 'path';
+import { exec } from 'child_process';
 
 const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
 const isDebugging = process.env.DEBUG_MODE;
@@ -61,16 +61,27 @@ const zipFiles = async (socket) => {
   socket.emit('message', {message: 'Compressing your memories.'});
   const outputFile = `${distributionDirectory}/${socket.id}/memories.zip`;
 
-  try {
-    const zip = new admZip();
+  fs.mkdirSync(`${distributionDirectory}/${socket.id}`);
+  
+  exec(`zip -r ${outputFile} ${socket.downloadFolder}`, (err) => {
+    if (err) {
+      if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error:\n${err.message}`);
 
-    zip.addLocalFolder(socket.downloadFolder);
-    zip.writeZip(outputFile);
+      socket.emit('message', {
+        error: 'An error occured while compressing your memories.<br />Please try again'
+      });
+    }
+    else {
+      if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}.`);
+      
+      socket.emit('message', {
+        count: socket.total,
+        isComplete: true,
+        downloadRoute: `archive/${socket.id}/memories.zip`
+      });
+    }
+  });
 
-    if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}.`);
-  } catch {
-    if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}`);
-  }
 };
 
 export {

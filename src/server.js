@@ -74,7 +74,7 @@ io.on('connection', (socket) => {
       })
       .catch((err) => {
         if (socket.connected) {
-          socket.emit('message', {error: 'An unknown error occurred while processing your memories.<br />Please try again.'});
+          socket.emit('message', {error: 'An unknown error occurred while processing your memories.<br />Please try again'});
           
           if (isDebugging) {
             console.log(`[${socket.id}] An error occured while downloading memories. Error: ${err.message}`);
