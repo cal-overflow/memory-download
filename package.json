@@ -2,9 +2,8 @@
   "name": "memory-download",
   "version": "1.0.0",
   "scripts": {
-    "dev": "nodemon src/website/server.js",
-    "prod": "forever src/website/server.js",
-    "downloader": "node src/downloader/app.js"
+    "dev": "nodemon src/server.js",
+    "prod": "forever src/server.js"
   },
   "dependencies": {
     "adm-zip": "^0.5.9",
@@ -25,7 +24,7 @@
     "ignore": [
       "downloads/*",
       "memories/*",
-      "src/website/static/archive*"
+      "src/public/archive*"
     ]
   },
   "type": "module"

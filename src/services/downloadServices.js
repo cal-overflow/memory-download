@@ -4,7 +4,7 @@ import videoStitch from 'video-stitch';
 import {writeFile, getFileName, updateFileMetadata} from './fileServices.js';
 
 const videoConcat = videoStitch.concat;
-const isDebugging = process.argv.includes('-debug');
+const isDebugging = process.env.DEBUG_MODE;
 
 const checkVideoClip = (prev, cur) => {
   if (prev['Media Type'] !== 'Video' || cur['Media Type'] !== 'Video')
@@ -42,41 +42,66 @@ const checkVideoClip = (prev, cur) => {
   else return (times.prev.minute == 59 && times.cur.minute == 0);
 };
 
-let count = 0;
-
-const downloadPhotos = async (photos) => {
+const downloadPhotos = async (memories, socket) => {
+  const photos = memories.filter((memory) => memory['Media Type'] === 'Image');
+  const type = 'photo';
   let year;
 
-  for (const photo of photos) {
-    if (count % 10 == 0) process.send({count});
-
+  for (let i = 0; i < photos.length; i++) {
+    const photo = photos[i];
+    
     if (year !== photo.Date.substring(0, 4)) {
       year = photo.Date.substring(0, 4);
-      process.send({message: `Processing photos from ${year}.`});
+      sendSocketMessages({
+        socket,
+        count: i,
+        type,
+        year
+      });
+    }
+    else {
+      sendSocketMessages({
+        socket,
+        count: i,
+        type
+      });
     }
 
     const res = await fetch(photo['Download Link'], {method: 'POST'});
     const url = await res.text();
     const download = await fetch(url);
-    const fileName = await getFileName(photo);
+    const fileName = await getFileName(photo, socket);
 
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, photo);
-
-    count++;
   }
 };
 
-const downloadVideos = async (videos) => {
+const downloadVideos = async (memories, socket) => {
+  const photoCount = memories.filter((memory) => memory['Media Type'] === 'Image').length;
+  const videos = memories.filter((memory) => memory['Media Type'] === 'Video');
+  const type = 'video';
+  let year, prevMemory, fileName, prevUrl, prevFileName;
   let clips = [];
-  let year, prevMemory, fileName, fileStream, prevUrl, prevFileName;
 
-  for (const video of videos) {
-    if (count % 10 == 0) process.send({count});
+  for (let i = 0; i < videos.length; i++) {
+    const video = videos[i];
 
     if (year !== video.Date.substring(0, 4)) {
       year = video.Date.substring(0, 4);
-      process.send({message: `Processing videos from ${year}.`});
+      sendSocketMessages({
+        socket,
+        type,
+        count: i + photoCount,
+        year
+      });
+    }
+    else {
+      sendSocketMessages({
+        socket,
+        type,
+        count: i + photoCount
+      });
     }
 
     const res = await fetch((video['Download Link']), {method: 'POST'});
@@ -93,7 +118,7 @@ const downloadVideos = async (videos) => {
 
       videoConcat()
       .clips(clips)
-      .output(await getFileName(prevMemory, true))
+      .output(await getFileName(prevMemory, socket, true))
       .concat()
       .then((outputFile) => {
         updateFileMetadata(outputFile, prevMemory);
@@ -102,20 +127,20 @@ const downloadVideos = async (videos) => {
           fs.rmSync(clip.fileName);
       })
       .catch((err) => {
-        process.send({message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`});
+        socket.emit('message', {message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`});
 
         if (isDebugging) {
           if (err) {
-            process.send({debug: `An error occurred while trying to combine video clips. Error:\n${err.message}`});
+            console.log(`[${socket.id}] An error occurred while trying to combine video clips. Error:\n${err.message}`);
           }
-          else process.send({debug: 'An unknown error occurred while trying to combine video clips'});
+          else console.log(`[${socket.id}] An unknown error occurred while trying to combine video clips`);
         }
       })
       .finally(() => clips = []);
     }
 
     const download = await fetch(url);
-    fileName = await getFileName(video);
+    fileName = await getFileName(video, socket);
 
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, video);
@@ -123,7 +148,15 @@ const downloadVideos = async (videos) => {
     prevUrl = url;
     prevMemory = video;
     prevFileName = fileName;
-    count++;
+  }
+};
+
+const sendSocketMessages = ({socket, year, count, type}) => {
+  if (year || (count % 10 === 0 && count !== 0)) {
+    socket.emit('message', {
+      count,
+      message: year ? `Processing ${type}s from ${year}.` : undefined
+    });
   }
 };
 

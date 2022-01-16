@@ -137,8 +137,13 @@
             <div class="text-center">
               <h4>Your download is ready</h4>
               <p id="download-text"></p>
-              <p><small>This link will expire in an hour</small></p>
+              <p><small>This link will expire shortly</small></p>
             </div>
+          </div>
+
+          <div id="reconnecting" class="container-md text-center d-none">
+            <div class="spinner-border" style="width: 3rem; height: 3rem;"></div>
+            <p>Reconnecting...</p>
           </div>
 
           <button id="nav-button" class="btn btn-dark mb-2">Get Started</button>
@@ -150,7 +155,6 @@
           <button id="try-again-button" onclick="location.reload();" class="btn btn-dark mb-2">Try again</button>
         </div>
       </div>
-
     </div>
     
     <div id="tutorial" class="bg-snap-yellow text-center container-fluid py-2">
@@ -189,12 +193,13 @@
   const navButton = document.getElementById('nav-button');
   const tutorialCard = document.getElementById('tutorial');
   const progressBar = document.getElementById('progress-bar');
+  const reconnectingCard = document.getElementById('reconnecting');
 
   var socket = io();
   var uploader = new SocketIOFileUpload(socket);
   
-  let total;
-  let step = 0;
+  let step = total = originalSocketId = 0;
+  let processingMemories = attemptingReconnect = false;
   
   navButton.addEventListener('click', () => {
     if (step < 3) {
@@ -226,6 +231,7 @@
   });
 
   socket.on('uploadSuccess', () => {
+    processingMemories = true;
     waitCard.classList.remove('d-none')
   });
 
@@ -235,32 +241,88 @@
 
       total = data.total;
     }
-    else if (data.count) {
+    if (data.count) {
       const percent = `${parseInt((data.count / total) * 100)}%`;
       progressBar.style.width = percent;
       progress.innerHTML = percent;
       
     }
-    else if (data.error) {
-      waitCard.classList.add('d-none');
-
-      errorText.innerHTML = data.error;
-      errorCard.classList.remove('d-none');
-      tutorialCard.classList.remove('d-none');
-
+    if (data.error) {
+      showErrorMessage(data.error);
     }
-    else message.innerHTML = data.message || '';
+    if (data.message) {
+      message.innerHTML = data.message;
+    }
+
+    if (data.isComplete) {
+      handleDownloadReady(data);
+    }
   });
 
-  socket.on('downloadLink', (link) => {
+  socket.on('connect', () => {
+    if (!originalSocketId) {
+      originalSocketId = socket.id;
+    }
+
+    if (attemptingReconnect) {
+      const downloadRoute = `/archive/${originalSocketId}/memories.zip`;
+      fetch(downloadRoute)
+      .then((res) => {
+        if (res.ok) {
+          reconnectingCard.classList.add('d-none');
+          handleDownloadReady({downloadRoute})
+        }
+        else {
+          showErrorMessage('Unable to re-establish connection to server.<br />Please try again');
+        }
+      })
+      .catch((err) => {
+        showErrorMessage('Unable to re-establish connection to server.<br />Please try again');
+      })
+      .finally(() => {
+        attemptingReconnect = false;
+      });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    attemptingReconnect = processingMemories;
+
+    if (!processingMemories) {
+      showErrorMessage('Lost connection to the server. Please refresh the page');
+    }
+
+    navButton.classList.add('d-none');
+    for (let i = 0; i <= 5; i++) {
+      document.getElementById(`step-${i}`).classList.add('d-none');
+    }
+
+    if (attemptingReconnect) reconnectingCard.classList.remove('d-none');
+  });
+
+  function handleDownloadReady(data) {
     waitCard.classList.add('d-none');
     doneCard.classList.remove('d-none');
+
     const hyperlink = document.createElement('a');
-    hyperlink.setAttribute('href', link);
+    hyperlink.setAttribute('href', data.downloadRoute);
     hyperlink.setAttribute('download', '');
     hyperlink.innerHTML = 'Download';
 
+    hyperlink.addEventListener('click', () => {
+      socket.emit('download');
+    });
+
     downloadText.appendChild(hyperlink);
-  });
+  }
+
+  function showErrorMessage(errorMessage) {
+    reconnectingCard.classList.add('d-none');
+    waitCard.classList.add('d-none');
+
+    errorText.innerHTML = errorMessage;
+    errorCard.classList.remove('d-none');
+    tutorialCard.classList.remove('d-none');
+  }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
