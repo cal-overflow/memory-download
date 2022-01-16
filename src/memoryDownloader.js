@@ -22,17 +22,13 @@ export const downloadMemories = async (socket) => {
   }
   
   const memories = data['Saved Media'].reverse();
+  
   socket.emit('message', {total: memories.length});
+  socket.total = memories.length;
 
   if (isDebugging) console.log(`[${socket.id}] Processing ${memories.length} memories`);
   
   await downloadPhotos(memories, socket);
   await downloadVideos(memories, socket);
   await zipFiles(socket);
-  
-  socket.emit('message', {
-    count: memories.length,
-    isComplete: true,
-    downloadRoute: `archive/${socket.id}/memories.zip`
-  });
 };
