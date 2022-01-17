@@ -8,7 +8,7 @@ import {downloadMemories} from './memoryDownloader.js';
 
 const isDebugging = process.env.DEBUG_MODE;
 const isProdEnv = process.env.NODE_ENV === 'production';
-const archiveDeletionDelay = isProdEnv ? 600000 : 60000;
+const archiveDeletionDelay = isProdEnv ? 1800000 : 60000;
 
 const downloadDirectory = './downloads';
 const outputDirectory = './memories';
@@ -47,6 +47,8 @@ app.get('/*', (req, res) => {
   }
   else res.redirect('/');
 });
+
+const recentConnections = {};
 
 io.on('connection', (socket) => {
   if (isDebugging) console.log(`[${socket.id}] Socket connected`);
@@ -95,19 +97,40 @@ io.on('connection', (socket) => {
     if (isDebugging) console.log(`[${socket.id}] Download link clicked`);
   });
 
-  socket.on('disconnect', () => {
-    if (isDebugging) console.log(`[${socket.id}] Socket disconnected`);
+  socket.on('reconnect', (prevSocketID) => {
+    socket.prevSocketID = prevSocketID;
+    socket.isReconnectedSocket = true;
 
-    const uncompressedMemories = `${outputDirectory}/${socket.id}`;
-    const compressedMemories = `${distributionDirectory}/${socket.id}`;    
+    if (prevSocketID in recentConnections) {
+      if (isDebugging) console.log(`[${prevSocketID}] Reconnected as ${socket.id}`);
+
+      clearTimeout(recentConnections[prevSocketID].deleteArchiveTimeoutID); // clear the timeout to delete archive
+
+      socket.emit('message', {
+        isComplete: true,
+        downloadRoute: `archive/${prevSocketID}/memories.zip`
+      });
+    }
+    else {
+      socket.emit('message', {
+        error: 'You lost connection to the server before your memories were processed.<br />Please try again'
+      });
+    }
+  });
+
+  socket.on('disconnect', (event) => {
+    if (isDebugging) console.log(`[${socket.id}] Socket disconnected. Event: ${event}`);
 
     // delete JSON input file
     if (fs.existsSync(socket.file)) {
       fs.rmSync(socket.file);
     }
+
+    const uncompressedMemories = `${outputDirectory}/${socket.id}`;
     
     // delete uncompressed memories from the server
     if (fs.existsSync(uncompressedMemories)) {
+      if (isDebugging) console.log(`[${socket.id}] Destroying downloaded memories`);
       fs.rm(
         uncompressedMemories,
         {
@@ -118,10 +141,20 @@ io.on('connection', (socket) => {
       );
     }
 
-    // set timer to delete compressed memories from the server after delay
+    let compressedMemories;
+
+    if (socket.isReconnectedSocket && socket.prevSocketID in recentConnections) {
+      compressedMemories = `${distributionDirectory}/${socket.prevSocketID}`;
+    }
+    else {
+      compressedMemories = `${distributionDirectory}/${socket.id}`;
+    }
+
+    // set timer to delete compressed memories and prevent reconnecting after delay
     if (fs.existsSync(compressedMemories)) {
-      setTimeout(() => {
+      socket.deleteArchiveTimeoutID = setTimeout(() => {
         if (isDebugging) console.log(`[${socket.id}] Destroying archive file`);
+        
         fs.rm(
           compressedMemories, 
           {
@@ -130,7 +163,21 @@ io.on('connection', (socket) => {
           },
           (err) => fsCallback(err, compressedMemories, socket)
         );
+
+        // delete the original socket from disconnected sockets (remove ability to reconnect)
+        if (!socket.isReconnectedSocket) {
+          delete recentConnections[socket.id];
+        }
+        else {
+          delete recentConnections[socket.prevSocketID];
+        }
+
       }, archiveDeletionDelay);
+
+      // save this socket id to allow for reconnecting if not already reconnected 
+      if (!socket.isReconnectedSocket) {
+        recentConnections[socket.id] = socket;
+      }
     }
   });
 });

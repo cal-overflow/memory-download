@@ -42,13 +42,16 @@ const getFileName = async (memory, socket, isConcatenatedVideo=false) => {
   return path.resolve(`${socket.downloadFolder}/${confirmedFileName}.${extension}`);
 };
 
-const writeFile = async (file, data) => {
+const writeFile = async (file, data, socket) => {
   const fileStream = fs.createWriteStream(file);
 
   await new Promise((resolve, reject) => {
     data.pipe(fileStream);
     data.on("error", reject);
     fileStream.on("finish", resolve);
+  })
+  .catch((err) => {
+    if (isDebugging) console.log(`[${socket.id}] An error occurred with the file system. Error: ${err.message}`);
   });
 };
 
@@ -64,9 +67,11 @@ const zipFiles = async (socket) => {
   fs.mkdirSync(`${distributionDirectory}/${socket.id}`);
 
   try {
+    if (isDebugging) console.log(`[${socket.id}] Compressing memories`);
+
     execSync(`zip -r ${outputFile} ${socket.downloadFolder}`);
 
-    if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}.`);
+    if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}`);
       
     socket.emit('message', {
       count: socket.total,
@@ -74,7 +79,7 @@ const zipFiles = async (socket) => {
       downloadRoute: `archive/${socket.id}/memories.zip`
     });
   } catch (err) {
-    if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error:\n${err.message}`);
+    if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error: ${err.message}`);
 
     socket.emit('message', {
       error: 'An error occured while compressing your memories.<br />Please try again'

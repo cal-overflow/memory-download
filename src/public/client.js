@@ -13,9 +13,7 @@ const tutorialCard = document.getElementById('tutorial');
 const progressBar = document.getElementById('progress-bar');
 const reconnectingCard = document.getElementById('reconnecting');
 
-var socket = io();
-var uploader = new SocketIOFileUpload(socket);
-
+var socket, uploader;
 let step = total = originalSocketId = 0;
 let processingMemories = attemptingReconnect = false;
 const failedMemories = [];
@@ -28,7 +26,76 @@ navButton.addEventListener('click', () => {
 
     if (step === 1) navButton.innerHTML = 'Continue';
     
-    if (step === 3) navButton.innerHTML = 'Upload';
+    if (step === 3) {
+      socket = io();
+      uploader = new SocketIOFileUpload(socket);
+
+      navButton.innerHTML = 'Upload';
+
+      socket.on('uploadFail', () => {
+        failMessage.classList.remove('invisible');
+      });
+      
+      socket.on('uploadSuccess', () => {
+        processingMemories = true;
+        waitCard.classList.remove('d-none')
+      });
+      
+      socket.on('message', (data) => {
+        attemptingReconnect = false;
+      
+        if (data.total) {
+          progress.classList.remove('d-none');
+      
+          total = data.total;
+        }
+        if (data.count) {
+          const percent = `${parseInt((data.count / total) * 100)}%`;
+          progressBar.style.width = percent;
+          progress.innerHTML = percent;
+          
+        }
+        if (data.error) {
+          socket.disconnect();
+          showErrorMessage(data.error);
+        }
+        if (data.failedMemory) {
+          failedMemories.push(data.failedMemory);
+        }
+        if (data.message) {
+          message.innerHTML = data.message;
+        }
+      
+        if (data.isComplete) {
+          handleDownloadReady(data);
+        }
+      });
+      
+      socket.on('connect', () => {
+        if (!originalSocketId) {
+          originalSocketId = socket.id;
+        }
+      
+        if (attemptingReconnect) {
+          socket.emit('reconnect', originalSocketId);
+        }
+      });
+      
+      socket.on('disconnect', () => {
+        attemptingReconnect = processingMemories;
+      
+        if (!attemptingReconnect) {
+          showErrorMessage('Lost connection to the server. Please refresh the page');
+        }
+      
+        navButton.classList.add('d-none');
+        for (let i = 0; i <= 5; i++) {
+          document.getElementById(`step-${i}`).classList.add('d-none');
+        }
+      
+        if (attemptingReconnect) reconnectingCard.classList.remove('d-none');
+      });
+    }
   }
   
   if (step >= 3 && fileUpload.value) {
@@ -45,86 +112,10 @@ fileUpload.addEventListener('click', () => {
   failMessage.classList.add('invisible');
 });
 
-socket.on('uploadFail', () => {
-  failMessage.classList.remove('invisible');
-});
-
-socket.on('uploadSuccess', () => {
-  processingMemories = true;
-  waitCard.classList.remove('d-none')
-});
-
-socket.on('message', (data) => {
-  if (data.total) {
-    progress.classList.remove('d-none');
-
-    total = data.total;
-  }
-  if (data.count) {
-    const percent = `${parseInt((data.count / total) * 100)}%`;
-    progressBar.style.width = percent;
-    progress.innerHTML = percent;
-    
-  }
-  if (data.error) {
-    showErrorMessage(data.error);
-  }
-  if (data.failedMemory) {
-    failedMemories.push(data.failedMemory);
-  }
-  if (data.message) {
-    message.innerHTML = data.message;
-  }
-
-  if (data.isComplete) {
-    handleDownloadReady(data);
-  }
-});
-
-socket.on('connect', () => {
-  if (!originalSocketId) {
-    originalSocketId = socket.id;
-  }
-
-  if (attemptingReconnect) {
-    const downloadRoute = `/archive/${originalSocketId}/memories.zip`;
-    fetch(downloadRoute)
-    .then((res) => {
-      if (res.ok) {
-        reconnectingCard.classList.add('d-none');
-        handleDownloadReady({downloadRoute})
-      }
-      else {
-        showErrorMessage('Unable to re-establish connection to server.<br />Please try again');
-      }
-    })
-    .catch((err) => {
-      showErrorMessage('Unable to re-establish connection to server.<br />Please try again');
-    })
-    .finally(() => {
-      attemptingReconnect = false;
-    });
-  }
-});
-
-socket.on('disconnect', () => {
-  attemptingReconnect = processingMemories;
-
-  if (!processingMemories) {
-    showErrorMessage('Lost connection to the server. Please refresh the page');
-  }
-
-  navButton.classList.add('d-none');
-  for (let i = 0; i <= 5; i++) {
-    document.getElementById(`step-${i}`).classList.add('d-none');
-  }
-
-  if (attemptingReconnect) reconnectingCard.classList.remove('d-none');
-});
-
 const handleDownloadReady = (data) => {
   waitCard.classList.add('d-none');
   doneCard.classList.remove('d-none');
+  reconnectingCard.classList.add('d-none');
 
   downloadLink.setAttribute('href', data.downloadRoute);
   downloadLink.addEventListener('click', () => socket.emit('download'));
