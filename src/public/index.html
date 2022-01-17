@@ -136,8 +136,9 @@
             <h4>Step 5: Download your memories!</h4>
             <div class="text-center">
               <h4>Your download is ready</h4>
-              <p id="download-text"></p>
+              <p><a id="download-link" download>Download</a></p>
               <p><small>This link will expire shortly</small></p>
+              <div id="failed-memories"></div>
             </div>
           </div>
 
@@ -153,6 +154,7 @@
           <h4>Uh oh</h4>
           <p id="error-text"></p>
           <button id="try-again-button" onclick="location.reload();" class="btn btn-dark mb-2">Try again</button>
+          <p>Please note that this website is still early in development.<br />Issues such as this will be resolved soon!</p>
         </div>
       </div>
     </div>
@@ -189,7 +191,7 @@
   const errorCard = document.getElementById('error-card');
   const errorText = document.getElementById('error-text');
   const doneCard = document.getElementById('step-5');
-  const downloadText = document.getElementById('download-text');
+  const downloadLink = document.getElementById('download-link');
   const navButton = document.getElementById('nav-button');
   const tutorialCard = document.getElementById('tutorial');
   const progressBar = document.getElementById('progress-bar');
@@ -200,6 +202,7 @@
   
   let step = total = originalSocketId = 0;
   let processingMemories = attemptingReconnect = false;
+  const failedMemories = [];
   
   navButton.addEventListener('click', () => {
     if (step < 3) {
@@ -249,6 +252,9 @@
     }
     if (data.error) {
       showErrorMessage(data.error);
+    }
+    if (data.failedMemory) {
+      failedMemories.push(data.failedMemory);
     }
     if (data.message) {
       message.innerHTML = data.message;
@@ -304,16 +310,27 @@
     waitCard.classList.add('d-none');
     doneCard.classList.remove('d-none');
 
-    const hyperlink = document.createElement('a');
-    hyperlink.setAttribute('href', data.downloadRoute);
-    hyperlink.setAttribute('download', '');
-    hyperlink.innerHTML = 'Download';
+    downloadLink.setAttribute('href', data.downloadRoute);
+    downloadLink.addEventListener('click', () => socket.emit('download'));
 
-    hyperlink.addEventListener('click', () => {
-      socket.emit('download');
-    });
+    if (failedMemories.length) {
+      const failedMemoriesContent = document.getElementById('failed-memories');
+      const failedMemoriesList = document.createElement('ul');
 
-    downloadText.appendChild(hyperlink);
+      const failedMemoriesDescription = document.createElement('p');
+      failedMemoriesDescription.innerHTML = `${failedMemories.length} memories failed to download<br />Metadata of the failed memories are shown below.<br /><br /><small>Why is this happening?<br />This is likely an error that occurred when something went wrong gathering a memory from Snapchat.</small>`;
+
+      failedMemories.forEach((memory) => {
+        const memoryInfo = document.createElement('li');
+        memoryInfo.innerHTML = `${memory['Media Type']} - ${memory['Date']}`;
+        
+        failedMemoriesContent.append(memoryInfo);
+        failedMemoriesList.append(memoryInfo);
+      });
+
+      failedMemoriesContent.append(failedMemoriesDescription);
+      failedMemoriesContent.append(failedMemoriesList);
+    }
   }
 
   function showErrorMessage(errorMessage) {
