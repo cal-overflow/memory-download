@@ -67,9 +67,13 @@ const downloadPhotos = async (memories, socket) => {
       });
     }
 
-    const res = await fetch(photo['Download Link'], {method: 'POST'});
+    const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, socket, photo));
+    if (!res) continue;
+
     const url = await res.text();
-    const download = await fetch(url);
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, socket, photo));
+    if (!download) continue;
+
     const fileName = await getFileName(photo, socket);
 
     await writeFile(fileName, download.body);
@@ -104,7 +108,9 @@ const downloadVideos = async (memories, socket) => {
       });
     }
 
-    const res = await fetch((video['Download Link']), {method: 'POST'});
+    const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, socket, video));
+    if (!res) continue;
+
     const url = await res.text();
     if (url === prevUrl) continue; // Ignore duplicate URLs
 
@@ -139,7 +145,9 @@ const downloadVideos = async (memories, socket) => {
       .finally(() => clips = []);
     }
 
-    const download = await fetch(url);
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, socket, video));
+    if (!download) continue;
+
     fileName = await getFileName(video, socket);
 
     await writeFile(fileName, download.body);
@@ -158,6 +166,14 @@ const sendSocketMessages = ({socket, year, count, type}) => {
       message: year ? `Processing ${type}s from ${year}.` : undefined
     });
   }
+};
+
+const fetchErrorHandler = (err, socket, memory) => {
+  if (isDebugging) console.log(`[${socket.id}] There was an issue fetching a memory. Error:\n${err.message}`);
+
+  socket.emit('message', {
+    failedMemory: memory
+  });
 };
 
 export {downloadPhotos, downloadVideos};
