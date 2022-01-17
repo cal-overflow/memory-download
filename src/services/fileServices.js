@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import { execSync } from 'child_process';
 
 const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
 const isDebugging = process.env.DEBUG_MODE;
@@ -62,25 +62,24 @@ const zipFiles = async (socket) => {
   const outputFile = `${distributionDirectory}/${socket.id}/memories.zip`;
 
   fs.mkdirSync(`${distributionDirectory}/${socket.id}`);
-  
-  exec(`zip -r ${outputFile} ${socket.downloadFolder}`, (err) => {
-    if (err) {
-      if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error:\n${err.message}`);
 
-      socket.emit('message', {
-        error: 'An error occured while compressing your memories.<br />Please try again'
-      });
-    }
-    else {
-      if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}.`);
+  try {
+    execSync(`zip -r ${outputFile} ${socket.downloadFolder}`);
+
+    if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}.`);
       
-      socket.emit('message', {
-        count: socket.total,
-        isComplete: true,
-        downloadRoute: `archive/${socket.id}/memories.zip`
-      });
-    }
-  });
+    socket.emit('message', {
+      count: socket.total,
+      isComplete: true,
+      downloadRoute: `archive/${socket.id}/memories.zip`
+    });
+  } catch (err) {
+    if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error:\n${err.message}`);
+
+    socket.emit('message', {
+      error: 'An error occured while compressing your memories.<br />Please try again'
+    });
+  }
 
 };
 
