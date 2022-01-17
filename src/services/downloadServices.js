@@ -76,7 +76,7 @@ const downloadPhotos = async (memories, socket) => {
 
     const fileName = await getFileName(photo, socket);
 
-    await writeFile(fileName, download.body);
+    await writeFile(fileName, download.body, socket);
     updateFileMetadata(fileName, photo);
   }
 };
@@ -137,7 +137,7 @@ const downloadVideos = async (memories, socket) => {
 
         if (isDebugging) {
           if (err) {
-            console.log(`[${socket.id}] An error occurred while trying to combine video clips. Error:\n${err.message}`);
+            console.log(`[${socket.id}] An error occurred while trying to combine video clips. Error: ${err.message}`);
           }
           else console.log(`[${socket.id}] An unknown error occurred while trying to combine video clips`);
         }
@@ -150,7 +150,7 @@ const downloadVideos = async (memories, socket) => {
 
     fileName = await getFileName(video, socket);
 
-    await writeFile(fileName, download.body);
+    await writeFile(fileName, download.body, socket);
     updateFileMetadata(fileName, video);
 
     prevUrl = url;
@@ -169,7 +169,7 @@ const sendSocketMessages = ({socket, year, count, type}) => {
 };
 
 const fetchErrorHandler = (err, socket, memory) => {
-  if (isDebugging) console.log(`[${socket.id}] There was an issue fetching a memory. Error:\n${err.message}`);
+  if (isDebugging) console.log(`[${socket.id}] There was an issue fetching a memory. Error: ${err.message}`);
 
   socket.emit('message', {
     failedMemory: memory
