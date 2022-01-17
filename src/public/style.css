@@ -1,0 +1,27 @@
+.invert {
+  -webkit-filter: invert(100%);
+  filter: invert(100%);
+}
+.bg-snap-yellow {
+  background-color: #FFFC00;
+}
+tt {
+  background-color: rgb(50, 50, 50);
+  color: white;
+  border-radius: 3px;
+  padding: 2px;
+}
+.btn {
+  border-radius: 3px;
+}
+.btn:hover, .btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+.btn:hover {
+  filter: drop-shadow(1px 1px 1px rgb(50, 50, 50));
+}
+a.disabled {
+  pointer-events: none;
+  cursor: default;
+}
