@@ -1,6 +1,12 @@
 {
   "name": "memory-download",
   "version": "1.0.0",
+  "description": "Desktop application for downloading your Snapchat memories.",
+  "author": {
+    "name": "Christan Lisle",
+    "email": "lisleachristian@gmail.com",
+    "url": "http://www.christianlisle.com"
+  },
   "main": "src/main.js",
   "scripts": {
     "dev": "DEBUG_MODE=true electron-forge start",
@@ -30,7 +36,7 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "Memory Downloader"
+            "name": "memory-download"
           }
         },
         {
@@ -42,19 +48,19 @@
             "mas"
           ],
           "config": {
-            "name": "Memory Downloader"
+            "name": "memory-download"
           }
         },
         {
           "name": "@electron-forge/maker-deb",
           "config": {
-            "name": "Memory Downloader"
+            "name": "memory-download"
           }
         },
         {
           "name": "@electron-forge/maker-rpm",
           "config": {
-            "name": "Memory Downloader"
+            "name": "memory-download"
           }
         }
       ]
