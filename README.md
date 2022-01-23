@@ -8,6 +8,7 @@ This project allows you to say goodbye to the service by downloading all of your
 
 Visit [www.downloadmysnapchatmemories.com](http://www.downloadmysnapchatmemories.com).
 
+
 ### Running locally
 <!-- no toc -->
 
@@ -15,7 +16,7 @@ Visit [www.downloadmysnapchatmemories.com](http://www.downloadmysnapchatmemories
 1. [NodeJS](http://nodejs.org) (v17.1.0)
 2. [npm](http://npmjs.com)
 3. [nvm](http://nvm.sh/)
-4. [FFmpeg](https://www.ffmpeg.org/) 
+4. [FFmpeg](https://www.ffmpeg.org/)
 
 Once the repository is cloned on your computer, navigate to the repository folder, `memory-download`.
 
@@ -31,13 +32,9 @@ Install the required node modules using `npm`:
 npm i
 ```
 
-Run the web server in development mode
+Run the [Electron](https://www.electronjs.org/) desktop application in development mode
 ```bash
-# Default config (port 3000)
 npm run dev
-
-# Optionally, change the port with an environment variable
-PORT=1234 npm run dev
 ```
 
-With a browser, visit http://localhost:3000 (or whatever port you have configured). Follow the steps provided by the simple user-interface to download your Snapchat memories.
+An electron application will open in development mode. Follow the steps provided by the simple user-interface to download your Snapchat memories.

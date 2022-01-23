@@ -1,34 +1,39 @@
 
-import {
+const {
   downloadPhotos,
   downloadVideos
-} from './services/downloadServices.js';
-import {
+} = require('./services/downloadServices.js');
+const {
   initializeEnvironment,
   getMemoryDataFromJSON,
-  zipFiles
-} from './services/fileServices.js';
+  getOutputInfo
+} = require('./services/fileServices.js');
 
 const isDebugging = process.env.DEBUG_MODE;
 
-export const downloadMemories = async (socket) => {  
-  initializeEnvironment(socket);
+const downloadMemories = async (filepath, outputDirectory, sendMessage) => {  
+  initializeEnvironment(filepath, outputDirectory);
   
-  const data = getMemoryDataFromJSON(socket.file);
+  const data = getMemoryDataFromJSON(filepath);
   
   if (!data['Saved Media']) {
-    socket.emit('message', {error: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.'});
+    sendMessage({error: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.'});
     return;
   }
   
   const memories = data['Saved Media'].reverse();
+  const total = memories.length;
   
-  socket.emit('message', {total: memories.length});
-  socket.total = memories.length;
+  sendMessage({total});
 
-  if (isDebugging) console.log(`[${socket.id}] Processing ${memories.length} memories`);
+  if (isDebugging) console.log(`Processing ${total} memories`);
   
-  await downloadPhotos(memories, socket);
-  await downloadVideos(memories, socket);
-  await zipFiles(socket);
+  await downloadPhotos(memories, sendMessage);
+  await downloadVideos(memories, sendMessage);
+  const downloadInfo = await getOutputInfo();
+
+  sendMessage({ total, isComplete: true, ...downloadInfo });
 };
+
+
+module.exports = { downloadMemories };
