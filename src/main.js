@@ -20,12 +20,11 @@ const createWindow = () => {
   win.loadFile('src/public/index.html');
 
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if ('file://' === url.substring(0, 7)) {
+    if (process.platform === 'darwin' && 'file://' === url.substring(0, 7)) {
       shell.showItemInFolder(url.substring(7, url.length));
-      return { action: 'deny' };
     }
-    
-    shell.openExternal(url);
+    else shell.openExternal(url);
+
     return { action: 'deny' };
   });
 
