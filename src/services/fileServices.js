@@ -1,22 +1,38 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
+const fs = require('fs');
+const path = require('path');
 
-const constants = JSON.parse(fs.readFileSync('./src/constants.json'));
+const constants = {
+  months: {
+    "01": "January",
+    "02": "February",
+    "03": "March",
+    "04": "April",
+    "05": "May",
+    "06": "June",
+    "07": "July",
+    "08": "August",
+    "09": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  }
+};
+
 const isDebugging = process.env.DEBUG_MODE;
-const distributionDirectory = './src/public/archive';
+let outputDirectory;
 
 const getMemoryDataFromJSON = (inputFile) => JSON.parse(fs.readFileSync(inputFile));
 
-const initializeEnvironment = (socket) => {
-  if (!fs.existsSync(socket.file))
-    throw new Error(`JSON file "${socket.file}" not found.`);
+const initializeEnvironment = (file, output) => {
+  if (!fs.existsSync(file))
+    throw new Error(`JSON file "${file}" not found.`);
 
-  if (!fs.existsSync(socket.downloadFolder))
-    fs.mkdirSync(socket.downloadFolder);
+  outputDirectory = output;
+  if (!fs.existsSync(outputDirectory))
+    fs.mkdirSync(outputDirectory);
 }
 
-const getFileName = async (memory, socket, isConcatenatedVideo=false) => {
+const getFileName = async (memory, isConcatenatedVideo=false) => {
   const isPhoto = memory['Media Type'] === 'Image';
   const extension = isPhoto ? 'jpg' : 'mp4';
   const year = memory['Date'].substring(0, 4);
@@ -24,25 +40,25 @@ const getFileName = async (memory, socket, isConcatenatedVideo=false) => {
   const day = memory['Date'].substring(8, 10);
   let fileName;
 
-  if (!fs.existsSync(socket.downloadFolder))
-    throw new Error(`Output directory "${socket.downloadFolder}" does not exist`);
+  if (!fs.existsSync(outputDirectory))
+    throw new Error(`Output directory "${outputDirectory}" does not exist`);
 
-  if (!fs.existsSync(`./${socket.downloadFolder}/${year}`)) {
-    fs.mkdirSync(`./${socket.downloadFolder}/${year}`);
+  if (!fs.existsSync(`${outputDirectory}/${year}`)) {
+    fs.mkdirSync(`${outputDirectory}/${year}`);
   }
 
   fileName = `${year}/${month}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
 
   let i = 1;
   let confirmedFileName = fileName;
-  while (fs.existsSync(`${socket.downloadFolder}/${confirmedFileName}.${extension}`)) {
+  while (fs.existsSync(`${outputDirectory}/${confirmedFileName}.${extension}`)) {
     confirmedFileName = `${fileName}-${i++}`;
   }
 
-  return path.resolve(`${socket.downloadFolder}/${confirmedFileName}.${extension}`);
+  return path.resolve(`${outputDirectory}/${confirmedFileName}.${extension}`);
 };
 
-const writeFile = async (file, data, socket) => {
+const writeFile = async (file, data) => {
   const fileStream = fs.createWriteStream(file);
 
   await new Promise((resolve, reject) => {
@@ -51,7 +67,7 @@ const writeFile = async (file, data, socket) => {
     fileStream.on("finish", resolve);
   })
   .catch((err) => {
-    if (isDebugging) console.log(`[${socket.id}] An error occurred with the file system. Error: ${err.message}`);
+    if (isDebugging) console.log(`An error occurred with the file system. Error: ${err.message}`);
   });
 };
 
@@ -60,39 +76,20 @@ const updateFileMetadata = (file, memory) => {
   fs.utimes(file, date, date, () => {});
 };
 
-const zipFiles = async (socket) => {
-  socket.emit('message', {message: 'Compressing your memories.'});
-  const outputFile = `${distributionDirectory}/${socket.id}/memories.zip`;
+const getOutputInfo = () => {
+  if (isDebugging) console.log('Getting output info');
 
-  fs.mkdirSync(`${distributionDirectory}/${socket.id}`);
-
-  try {
-    if (isDebugging) console.log(`[${socket.id}] Compressing memories`);
-
-    execSync(`zip -r ${outputFile} ${socket.downloadFolder}`);
-
-    if (isDebugging) console.log(`[${socket.id}] Memories successfully compressed at ${outputFile}`);
-      
-    socket.emit('message', {
-      count: socket.total,
-      isComplete: true,
-      downloadRoute: `archive/${socket.id}/memories.zip`
-    });
-  } catch (err) {
-    if (isDebugging) console.log(`[${socket.id}] An error occured while compressing memories to ${outputFile}. Error: ${err.message}`);
-
-    socket.emit('message', {
-      error: 'An error occured while compressing your memories.<br />Please try again'
-    });
-  }
-
+  return {
+    outputDirectory,
+    message: `Your memories have been downloaded at:<br /><tt>${outputDirectory}</tt>`,
+  };
 };
 
-export {
+module.exports = {
   initializeEnvironment,
   getMemoryDataFromJSON,
   getFileName,
   writeFile,
   updateFileMetadata,
-  zipFiles
+  getOutputInfo,
 };
