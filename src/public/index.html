@@ -14,18 +14,18 @@
   <body class="bg-dark" onload="document.getElementById('form').reset();">
     <div class="bg-snap-yellow container-fluid m-0 p-0">
       <div class="container-md text-center p-5">
-        <a id="snap-logo-container" href="/"><img src="ghostlogo.svg" width="80" height="80" /></a>
+        <img src="ghostlogo.svg" width="80" height="80" />
         <h1><strong>Memory Download</strong></h1>
         <h4>Download all of your Snapchat memories with ease</h4>
       </div>
       
-      <div class="container-sm px-5 min-vh-50" style="min-height: 40vh;">
+      <div class="container-sm px-5 pb-4 min-vh-50" style="min-height: 40vh;">
         <div id="steps-card">
           <div id="step-0">
             <p>
               Want a copy of all your Snapchat memories? You're in the right place!
               <br />
-              This website allows you to download a copy of your memories to your computer all at once. It takes 5 simple steps.
+              This application allows you to download a copy of your memories to your computer all at once. It takes 5 simple steps.
             </p>
 
             <h4>Steps</h4>
@@ -34,7 +34,7 @@
               <li>Find and uncompress (unzip) your Snapchat data</li>
               <li>Upload your <tt>memories_history.json</tt> file</li>
               <li>Wait while your memories are prepared for you</li>
-              <li>Download your memories!</li>
+              <li>Enjoy your memories!</li>
             </ol>
           </div>
           
@@ -74,15 +74,24 @@
           <div id="step-3" class="d-none">
             <h4>Step 3: Upload your <tt>memories_history.json</tt> file</h4>
 
-            <p>
-              Upload the <tt>memories_history.json</tt> file that is included in the data downloaded from Snapchat.
-            </p>
+            <form id="form" action="">
+              <ol>
+                <li>
+                  Select the <tt>memories_history.json</tt> file that is included in the data downloaded from Snapchat.
+                  You can find the file within the <tt>json</tt> folder.
+                </li>
+              </ol>
+              <input type="file" accept=".json" id="file-input" class="form-control form-control-lg mb-2" />
 
-              <form id="form" action="">
-                <input type="file" accept=".json" id="siofu-input" />
-                <p id="upload-fail-message" class="invisible text-danger">There was an issue uploading your file. Please try again</p>
-              </form>
-              <p><small>Hint: You can find the file within the <tt>json</tt> folder</small></p>
+              <ol start="2">
+                <li>
+                  Select the folder where your memories will be downloaded.
+                </li>
+              </ol>
+              <div class="text-center">
+                <button id="choose-download-location-button" class="btn btn-dark my-2">Choose Download Folder</button>
+              </div>
+            </form>
           </div>
 
           <div id="step-4" class="container-md d-none">
@@ -93,30 +102,30 @@
                 <div id="progress-bar" class="progress-bar bg-dark" role="progressbar" style="width: 0%"></div>
               </div>
               <p class="d-none"id="percent">0%</p>
-    
+              
               <p>
                 <small>
                   This will take a while
                   <br />
-                  Do not close this tab
+                  Do not close this window
+                </small>
+              </p>
+              <p>
+                <small id="failed-video-combination-message" class="invisible">
+                  There was an issue failing to combine videos together. This issue is being addressed and should be fixed in future versions of the app.
                 </small>
               </p>
             </div>
           </div>
     
           <div id="step-5" class="container-md d-none">
-            <h4>Step 5: Download your memories!</h4>
+            <h4>Step 5: View your memories!</h4>
             <div class="text-center">
-              <h4>Your download is ready</h4>
-              <p><a id="download-link" download>Download</a></p>
-              <p><small>This link will expire shortly</small></p>
+              <h4>Your download is complete.</h4>
+              <button id="open-memories-button" class="btn btn-dark mb-2">View memories</button>
+              <p id="done-message"></p>
               <div id="failed-memories"></div>
             </div>
-          </div>
-
-          <div id="reconnecting" class="container-md text-center d-none">
-            <div class="spinner-border" style="width: 3rem; height: 3rem;"></div>
-            <p>Reconnecting...</p>
           </div>
 
           <button id="nav-button" class="btn btn-dark mb-2">Get Started</button>
@@ -130,28 +139,27 @@
         </div>
       </div>
     </div>
-    
-    <div id="tutorial" class="bg-snap-yellow text-center container-fluid py-2">
-      <p>
-        <a href="https://youtu.be/bLxJBb_ApRg" target="_blank" class="text-dark">Watch a tutorial</a>
-      </p>
-    </div>
 
     <div id="footer" class="container-fluid bg-dark text-center text-light py-4">
-      <p>
-        <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
+      <p id="step-counter">
+        <span id="1" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(1);">1</span>
+        <span id="2" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(2);">2</span>
+        <span id="3" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(3);">3</span>
+        <span id="4" class="p-2 rounded bg-light text-dark" role="button">4</span>
+        <span id="5" class="p-2 rounded bg-light text-dark" role="button">5</span>
       </p>
-      <p>
-        <a href="https://github.com/ChristianLisle/memory-download" target="_blank">
-          <img src="github.png" width="30" height="30" class="invert" />
-        </a>
-      </p>
+      
+      <div class="container-sm mt-4">
+        <p class="d-flex justify-content-between">
+          <a href="https://youtu.be/bLxJBb_ApRg" target="_blank" class="text-light text-decoration-none">Watch a tutorial</a>
+          <a href="http://www.christianlisle.com/contact?topic=Memory Download Feedback" target="_blank" class="text-light text-decoration-none">Provide feedback</a>
+          <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
+        </p>
+      </div>
     </div>
   </body>
 </html>
 
-<noscript>You must enable JavaScript to use all features of this website.</noscript>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/siofu/client.js"></script>
-<script type="text/javascript" src="client.js"></script>
+<noscript>You must enable JavaScript to use all features of this application.</noscript>
+<script type="text/javascript" src="app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>

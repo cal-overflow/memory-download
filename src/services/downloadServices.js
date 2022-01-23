@@ -1,7 +1,7 @@
-import fetch from 'node-fetch';
-import fs from 'fs';
-import videoStitch from 'video-stitch';
-import {writeFile, getFileName, updateFileMetadata} from './fileServices.js';
+const fetch = require('node-fetch');
+const fs = require('fs');
+const videoStitch = require('video-stitch');
+const { writeFile, getFileName, updateFileMetadata } = require('./fileServices.js');
 
 const videoConcat = videoStitch.concat;
 const isDebugging = process.env.DEBUG_MODE;
@@ -42,7 +42,7 @@ const checkVideoClip = (prev, cur) => {
   else return (times.prev.minute == 59 && times.cur.minute == 0);
 };
 
-const downloadPhotos = async (memories, socket) => {
+const downloadPhotos = async (memories, sendMessage) => {
   const photos = memories.filter((memory) => memory['Media Type'] === 'Image');
   const type = 'photo';
   let year;
@@ -52,36 +52,36 @@ const downloadPhotos = async (memories, socket) => {
     
     if (year !== photo.Date.substring(0, 4)) {
       year = photo.Date.substring(0, 4);
-      sendSocketMessages({
-        socket,
+      sendUpdateMessage({
+        sendMessage,
         count: i,
         type,
         year
       });
     }
     else {
-      sendSocketMessages({
-        socket,
+      sendUpdateMessage({
+        sendMessage,
         count: i,
         type
       });
     }
 
-    const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, socket, photo));
+    const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, photo, sendMessage));
     if (!res) continue;
-
+    
     const url = await res.text();
-    const download = await fetch(url).catch((e) => fetchErrorHandler(e, socket, photo));
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, photo, sendMessage));
     if (!download) continue;
 
-    const fileName = await getFileName(photo, socket);
+    const fileName = await getFileName(photo);
 
-    await writeFile(fileName, download.body, socket);
+    await writeFile(fileName, download.body);
     updateFileMetadata(fileName, photo);
   }
 };
 
-const downloadVideos = async (memories, socket) => {
+const downloadVideos = async (memories, sendMessage) => {
   const photoCount = memories.filter((memory) => memory['Media Type'] === 'Image').length;
   const videos = memories.filter((memory) => memory['Media Type'] === 'Video');
   const type = 'video';
@@ -93,22 +93,22 @@ const downloadVideos = async (memories, socket) => {
 
     if (year !== video.Date.substring(0, 4)) {
       year = video.Date.substring(0, 4);
-      sendSocketMessages({
-        socket,
+      sendUpdateMessage({
+        sendMessage,
         type,
         count: i + photoCount,
         year
       });
     }
     else {
-      sendSocketMessages({
-        socket,
+      sendUpdateMessage({
+        sendMessage,
         type,
         count: i + photoCount
       });
     }
 
-    const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, socket, video));
+    const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, video, sendMessage));
     if (!res) continue;
 
     const url = await res.text();
@@ -124,7 +124,7 @@ const downloadVideos = async (memories, socket) => {
 
       videoConcat()
       .clips(clips)
-      .output(await getFileName(prevMemory, socket, true))
+      .output(await getFileName(prevMemory, true))
       .concat()
       .then((outputFile) => {
         updateFileMetadata(outputFile, prevMemory);
@@ -133,24 +133,27 @@ const downloadVideos = async (memories, socket) => {
           fs.rmSync(clip.fileName);
       })
       .catch((err) => {
-        socket.emit('message', {message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`});
+        sendMessage({
+          message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`,
+          failedCombiningVideos: true,
+        });
 
         if (isDebugging) {
           if (err) {
-            console.log(`[${socket.id}] An error occurred while trying to combine video clips. Error: ${err.message}`);
+            console.log(`An error occurred while trying to combine video clips. Error: ${err.message}`);
           }
-          else console.log(`[${socket.id}] An unknown error occurred while trying to combine video clips`);
+          else console.log(`An unknown error occurred while trying to combine video clips`);
         }
       })
       .finally(() => clips = []);
     }
 
-    const download = await fetch(url).catch((e) => fetchErrorHandler(e, socket, video));
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, video, sendMessage));
     if (!download) continue;
 
-    fileName = await getFileName(video, socket);
+    fileName = await getFileName(video);
 
-    await writeFile(fileName, download.body, socket);
+    await writeFile(fileName, download.body);
     updateFileMetadata(fileName, video);
 
     prevUrl = url;
@@ -159,21 +162,21 @@ const downloadVideos = async (memories, socket) => {
   }
 };
 
-const sendSocketMessages = ({socket, year, count, type}) => {
+const sendUpdateMessage = ({year, count, type, sendMessage}) => {
   if (year || (count % 10 === 0 && count !== 0)) {
-    socket.emit('message', {
-      count,
-      message: year ? `Processing ${type}s from ${year}.` : undefined
-    });
+    const data = {count};
+    if (year) {
+      data.message = `Processing ${type}s from ${year}.`;
+    }
+
+    sendMessage(data);
   }
 };
 
-const fetchErrorHandler = (err, socket, memory) => {
-  if (isDebugging) console.log(`[${socket.id}] There was an issue fetching a memory. Error: ${err.message}`);
+const fetchErrorHandler = (err, memory, sendMessage) => {
+  if (isDebugging) console.log(`There was an issue fetching a memory. Error: ${err.message}`);
 
-  socket.emit('message', {
-    failedMemory: memory
-  });
+  sendMessage({ failedMemory: memory });
 };
 
-export {downloadPhotos, downloadVideos};
+module.exports = { downloadPhotos, downloadVideos };
