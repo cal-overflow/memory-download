@@ -1,6 +1,5 @@
 const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
-const path = require('path')
-const {downloadMemories} = require('./memoryDownloader');
+const { downloadMemories } = require('./memoryDownloader');
 
 const isDebugging = process.env.DEBUG_MODE;
 

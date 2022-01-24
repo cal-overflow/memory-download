@@ -15,6 +15,7 @@
     "make": "electron-forge make"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "fs": "^0.0.1-security",
     "node-fetch": "^2.6.1",
     "video-stitch": "^1.7.1"
@@ -25,8 +26,8 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.63",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
     "@electron-forge/maker-zip": "^6.0.0-beta.63",
-    "electron-squirrel-startup": "^1.0.0",
-    "electron": "^16.0.7"
+    "electron": "^16.0.7",
+    "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
     "forge": {
