@@ -11,8 +11,9 @@
   "main": "src/main.js",
   "scripts": {
     "dev": "DEBUG_MODE=true electron-forge start",
+    "make": "electron-forge make",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "publish": "electron-forge publish"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -74,7 +75,8 @@
             "repository": {
               "owner": "ChristianLisle",
               "name": "memory-download"
-            }
+            },
+            "draft": true
           }
         }
       ]
