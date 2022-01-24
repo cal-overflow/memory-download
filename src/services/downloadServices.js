@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
+const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const videoStitch = require('video-stitch');
 const { writeFile, getFileName, updateFileMetadata } = require('./fileServices.js');
 
@@ -122,7 +123,7 @@ const downloadVideos = async (memories, sendMessage) => {
     else if (clips.length) {
       clips.push({fileName: prevFileName}); // Last clip was the final clip in this memory
 
-      videoConcat()
+      videoConcat({ ffmpeg_path: ffmpeg.path })
       .clips(clips)
       .output(await getFileName(prevMemory, true))
       .concat()
