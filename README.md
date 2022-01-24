@@ -16,7 +16,6 @@ Visit [www.downloadmysnapchatmemories.com](http://www.downloadmysnapchatmemories
 1. [NodeJS](http://nodejs.org) (v17.1.0)
 2. [npm](http://npmjs.com)
 3. [nvm](http://nvm.sh/)
-4. [FFmpeg](https://www.ffmpeg.org/)
 
 Once the repository is cloned on your computer, navigate to the repository folder, `memory-download`.
 
