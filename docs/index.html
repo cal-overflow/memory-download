@@ -40,34 +40,33 @@
 
           <div id="downloads">
             <h4>Download the application on your computer</h4>
+
             
-            <h5>MacOS</h5>
-            <a id="macos-arm" download><button class="btn btn-dark mb-2">M1</button></a>
-            <a id="macos-intel" download><button class="btn btn-dark mb-2">Intel</button></a>
-            <p><small>Need help determining what kind of mac you have? <a href="https://www.howtogeek.com/706226/how-to-check-if-your-mac-is-using-an-intel-or-apple-silicon-processor/" target="_blank">Click here</a></small></p>
+            <div class="text-center">
+              <a id="macos" download><button class="btn btn-lg btn-dark m-1 disabled"><img src="/apple.svg" width="30" height="40" class="invert align-middle" /> <span class="align-middle">MacOS</span></button></a>
+              <a id="windows" download><button class="btn btn-lg btn-dark m-1 disabled"><img src="/windows.png" width="36" height="40" class="invert align-middle" /> <span class="align-middle">Windows</span></button></a>
+              <a id="linux" download><button class="btn btn-lg btn-dark m-1 disabled"><img src="/linux.png" width="30" height="40" class="invert align-middle" /> <span class="align-middle">Linux</span></button></a>
 
-            <h5>Windows</h5>
-            <a id="windows-setup" download><button class="btn btn-dark mb-2">Installer</button></a>
-            <a id="windows-exe" download><button class="btn btn-dark mb-2">Executable</button></a>
-
-            <h5>Linux</h5>
-            <a id="linux-deb" download><button class="btn btn-dark mb-2">deb</button></a>
-            <a id="linux-rpm" download><button class="btn btn-dark mb-2">rpm</button></a>
-            <a id="linux-zip" download><button class="btn btn-dark mb-2">zip</button></a>
+              <p class="mt-2">
+                <small>
+                  <a href="https://github.com/ChristianLisle/memory-download/releases" class="text-dark" target="_blank">More download options</a>
+                </small>
+              </p>
+              
+              <p id="extra-feedback" class="text-center text-secondary invisible"></p>
+            </div>
           </div>
         </div>
-        <p id="extra-feedback" class="text-center text-secondary"></p>
       </div>
     </div>
 
     <div id="footer" class="container-fluid bg-dark text-center text-light py-4">
-      <div class="container-sm mt-4">
-        <p class="d-flex justify-content-between">
-          <a href="https://youtu.be/0_1mJ3w5LaA" target="_blank" class="text-light text-decoration-none">Watch a tutorial</a>
+      <pre id="version" class="text-center text-secondary spinner-border spinner-border-sm"></pre>
 
-          <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Provide feedback</a>
-          <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
-        </p>
+      <div class="container-sm d-md-flex justify-content-between mt-4 text-center">
+        <p class="d-block"><a href="https://youtu.be/0_1mJ3w5LaA" target="_blank" class="text-light text-decoration-none">Watch a tutorial</a></p>
+        <p class="d-block"><a href="http://www.christianlisle.com/contact" target="_blank" class="text-light text-decoration-none">Provide feedback</a></p>
+        <p class="d-block"><a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a></p>
       </div>
     </div>
   </body>
@@ -75,37 +74,38 @@
 
 <noscript>You must enable JavaScript to use all features of this website.</noscript>
 <script type="text/JavaScript">
-  const a = document.createElement('a');
-  a.setAttribute('download', null);
+  fetch('https://www.downloadmysnapchatmemories.com/version.txt')
+  .then((res) => {
+    if (res.status === 404) {
+      throw new Error('Latest version not found');
+    }
+    
+    return res.text();
+  })
+  .then((version) => {
+    const tagName = `v${version}`;
 
-  fetch('https://api.github.com/repos/ChristianLisle/memory-download/releases/latest')
-  .then(async (res) => {
-    res.json()
-    .then(({ tag_name }) => {
-      const version = tag_name.substring(1, tag_name.length);
-      console.log(tag_name);
-  
-      const baseUrl = `https://github.com/ChristianLisle/memory-download/releases/download`;
-      
-      document.getElementById('macos-arm').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-darwin-arm64-${version}.zip`);
-      
-      document.getElementById('macos-intel').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-darwin-x64-${version}.zip`);
-      
-      document.getElementById('windows-setup').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-${version}.Setup.exe`);
-      
-      document.getElementById('windows-exe').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-win32-x64-${version}.zip`);
-      
-      document.getElementById('linux-deb').setAttribute('href', `${baseUrl}/${tag_name}/memory-download_${version}_amd64.deb`);
-      
-      document.getElementById('linux-rpm').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-${version}-1.x86_64.rpm`);
-      
-      document.getElementById('linux-zip').setAttribute('href', `${baseUrl}/${tag_name}/memory-download-linux-x64-${version}.zip`);
+    const baseUrl = `https://github.com/ChristianLisle/memory-download/releases/download`;
+    
+    document.getElementById('macos').setAttribute('href', `${baseUrl}/${tagName}/memory-download-darwin-x64-${version}.zip`);
+    document.querySelector('#macos button').classList.remove('disabled');
 
-      document.getElementById('extra-feedback').innerHTML = `Version ${version}`;
-    });
+    document.getElementById('windows').setAttribute('href', `${baseUrl}/${tagName}/memory-download-win32-x64-${version}.zip`);
+    document.querySelector('#windows button').classList.remove('disabled');
+
+    document.getElementById('linux').setAttribute('href', `${baseUrl}/${tagName}/memory-download-linux-x64-${version}.zip`);
+    document.querySelector('#linux button').classList.remove('disabled');
+
+    document.getElementById('version').innerHTML = version;
   })
   .catch(() => {
     document.getElementById('extra-feedback').innerHTML = 'An error occurred getting the most recent version. Please refresh the page.';
+    document.getElementById('extra-feedback').classList.remove('invisible');
+
+    document.getElementById('version').innerHTML = 'Unable to detect latest version';
+  })
+  .finally(() => {
+    document.getElementById('version').classList.remove('spinner-border', 'spinner-border-sm');
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
