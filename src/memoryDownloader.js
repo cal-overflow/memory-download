@@ -11,7 +11,7 @@ const {
 
 const isDebugging = process.env.DEBUG_MODE;
 
-const downloadMemories = async (filepath, outputDirectory, sendMessage) => {  
+const downloadMemories = async (filepath, outputDirectory, options, sendMessage) => {  
   initializeEnvironment(filepath, outputDirectory);
   
   const data = getMemoryDataFromJSON(filepath);
@@ -22,12 +22,7 @@ const downloadMemories = async (filepath, outputDirectory, sendMessage) => {
   }
   
   const memories = data['Saved Media'].reverse();
-  const total = memories.length;
-  
-  sendMessage({total});
-
-  if (isDebugging) console.log(`Processing ${total} memories`);
-
+  let total = 0;
   let photos = [];
   let videos = [];
 
@@ -39,9 +34,22 @@ const downloadMemories = async (filepath, outputDirectory, sendMessage) => {
       videos.push(memory);
     }
   }
+
+  if (options.photos) total += photos.length;
+  if (options.videos) total += videos.length;
   
-  await downloadPhotos(photos, sendMessage);
-  await downloadVideos(videos, photos.length, sendMessage);
+  sendMessage({ total });
+  if (isDebugging) console.log(`Processing ${total} memories`);
+
+  if (options.photos) {
+    await downloadPhotos(photos, sendMessage);
+  }
+
+  if (options.videos) {
+    const countOffset = options.photos ? photos.length : 0;
+    await downloadVideos(videos, countOffset, sendMessage);
+  }
+
   const downloadInfo = await getOutputInfo();
 
   sendMessage({ total, isComplete: true, ...downloadInfo });
