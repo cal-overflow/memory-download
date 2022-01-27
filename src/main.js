@@ -1,3 +1,4 @@
+const path = require('path');
 const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
 const { downloadMemories } = require('./memoryDownloader');
 
@@ -10,6 +11,7 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
