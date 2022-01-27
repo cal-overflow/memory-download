@@ -13,8 +13,6 @@ const openMemories = document.getElementById('open-memories-button');
 const doneMessage = document.getElementById('done-message');
 const preview = document.getElementById('preview');
 const photoPreview = document.querySelector('#preview img');
-const videoPreview1 = document.querySelector('#preview #video1');
-const videoPreview2 = document.querySelector('#preview #video2');
 
 let step = total = downloadLocation = 0;
 const failedMemories = [];
@@ -121,30 +119,8 @@ const handlePreviewFile = (data) => {
   if (data.type === 'photo') {
     photoPreview.setAttribute('src', data.file);
   }
-  else {
-    if (!photoPreview.classList.contains('d-none')) {
-      videoPreview1.setAttribute('src', data.file);
-
-      photoPreview.classList.add('d-none');
-      videoPreview1.classList.remove('d-none');
-    }
-    else if (videoPreview1.classList.contains('d-none')) {
-      videoPreview1.setAttribute('src', data.file);
-
-      // Delay to ensure new video has loaded (more seamless transition)
-      setTimeout(() => {
-        videoPreview2.classList.add('d-none');
-        videoPreview1.classList.remove('d-none');
-      }, 100);
-    }
-    else {
-      videoPreview2.setAttribute('src', data.file);
-
-      setTimeout(() => {
-        videoPreview1.classList.add('d-none');
-        videoPreview2.classList.remove('d-none');
-      }, 100);
-    }
+  else if (!preview.classList.contains('d-none')) {
+    preview.classList.add('d-none');
   }
 };
 
@@ -206,6 +182,4 @@ const togglePreviewZoom = () => {
 
   preview.style.height = height;
   photoPreview.style.cursor = cursor;
-  videoPreview1.style.cursor = cursor;
-  videoPreview2.style.cursor = cursor;
 };
