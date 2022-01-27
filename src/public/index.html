@@ -14,12 +14,12 @@
   <body class="bg-dark" onload="document.getElementById('form').reset();">
     <div class="bg-snap-yellow container-fluid m-0 p-0">
       <div class="container-md text-center p-5">
-        <img src="ghostlogo.svg" width="80" height="80" />
+        <img src="ghostlogo.svg" width="60" height="60" />
         <h1><strong>Memory Download</strong></h1>
         <h4>Download all of your Snapchat memories with ease</h4>
       </div>
       
-      <div class="container-sm px-5 pb-4 min-vh-50" style="min-height: 40vh;">
+      <div class="container-sm px-5 pb-4 min-vh-50" style="min-height: 40vh; overflow-y: hidden;">
         <div id="steps-card">
           <div id="step-0">
             <p>
@@ -97,6 +97,28 @@
           <div id="step-4" class="container-md d-none">
             <h4>Step 4: Wait while your memories are prepared for you</h4>
             <div class="text-center">
+              <div id="preview">
+                <img class="rounded h-100" onclick="togglePreviewZoom()" />
+                <video
+                  id="video1"
+                  class="rounded h-100 d-none"
+                  autoplay
+                  muted
+                  loop
+                  onclick="togglePreviewZoom()"
+                >
+                </video>
+                <video
+                  id="video2"
+                  class="rounded h-100 d-none"
+                  autoplay
+                  muted
+                  loop
+                  onclick="togglePreviewZoom()"
+                >
+                </video>
+              </div>
+
               <p id="message">Downloading your memories...</p>
               <div class="progress">
                 <div id="progress-bar" class="progress-bar bg-dark" role="progressbar" style="width: 0%"></div>
@@ -111,7 +133,7 @@
                 </small>
               </p>
               <p>
-                <small id="failed-video-combination-message" class="invisible">
+                <small id="failed-video-combination-message" class="d-none">
                   There was an issue failing to combine videos together. This issue is being addressed and should be fixed in future versions of the app.
                 </small>
               </p>

@@ -1,22 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-
-const constants = {
-  months: {
-    "01": "January",
-    "02": "February",
-    "03": "March",
-    "04": "April",
-    "05": "May",
-    "06": "June",
-    "07": "July",
-    "08": "August",
-    "09": "September",
-    "10": "October",
-    "11": "November",
-    "12": "December"
-  }
-};
+const constants = require('./constants.js');
 
 const isDebugging = process.env.DEBUG_MODE;
 let outputDirectory;

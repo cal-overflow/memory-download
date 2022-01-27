@@ -25,3 +25,9 @@ a.disabled {
   pointer-events: none;
   cursor: default;
 }
+#preview {
+  height: 30vh;
+}
+#preview img, #preview video {
+  cursor: zoom-in;
+}
