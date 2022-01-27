@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const ffmpeg = require('@ffmpeg-installer/ffmpeg');
 const videoStitch = require('video-stitch');
+const constants = require('./constants.js');
 const { writeFile, getFileName, updateFileMetadata } = require('./fileServices.js');
 
 const videoConcat = videoStitch.concat;
@@ -43,30 +44,12 @@ const checkVideoClip = (prev, cur) => {
   else return (times.prev.minute == 59 && times.cur.minute == 0);
 };
 
-const downloadPhotos = async (memories, sendMessage) => {
-  const photos = memories.filter((memory) => memory['Media Type'] === 'Image');
+const downloadPhotos = async (photos, sendMessage) => {
   const type = 'photo';
-  let year;
+  const date = {};
 
   for (let i = 0; i < photos.length; i++) {
     const photo = photos[i];
-    
-    if (year !== photo.Date.substring(0, 4)) {
-      year = photo.Date.substring(0, 4);
-      sendUpdateMessage({
-        sendMessage,
-        count: i,
-        type,
-        year
-      });
-    }
-    else {
-      sendUpdateMessage({
-        sendMessage,
-        count: i,
-        type
-      });
-    }
 
     const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, photo, sendMessage));
     if (!res) continue;
@@ -79,35 +62,26 @@ const downloadPhotos = async (memories, sendMessage) => {
 
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, photo);
+    
+    handleUpdateMessages({
+      memory: photo,
+      sendMessage,
+      type,
+      count: i,
+      date,
+      file: fileName,
+    });
   }
 };
 
-const downloadVideos = async (memories, sendMessage) => {
-  const photoCount = memories.filter((memory) => memory['Media Type'] === 'Image').length;
-  const videos = memories.filter((memory) => memory['Media Type'] === 'Video');
+const downloadVideos = async (videos, photoCount, sendMessage) => {
   const type = 'video';
-  let year, prevMemory, fileName, prevUrl, prevFileName;
+  const date = {};
+  let prevMemory, fileName, prevUrl, prevFileName;
   let clips = [];
 
   for (let i = 0; i < videos.length; i++) {
     const video = videos[i];
-
-    if (year !== video.Date.substring(0, 4)) {
-      year = video.Date.substring(0, 4);
-      sendUpdateMessage({
-        sendMessage,
-        type,
-        count: i + photoCount,
-        year
-      });
-    }
-    else {
-      sendUpdateMessage({
-        sendMessage,
-        type,
-        count: i + photoCount
-      });
-    }
 
     const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, video, sendMessage));
     if (!res) continue;
@@ -157,18 +131,44 @@ const downloadVideos = async (memories, sendMessage) => {
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, video);
 
+    handleUpdateMessages({
+      memory: video,
+      sendMessage,
+      type,
+      count: i + photoCount,
+      date,
+      file: fileName,
+    });
+
     prevUrl = url;
     prevMemory = video;
     prevFileName = fileName;
   }
 };
 
-const sendUpdateMessage = ({year, count, type, sendMessage}) => {
-  if (year || (count % 10 === 0 && count !== 0)) {
-    const data = {count};
-    if (year) {
-      data.message = `Processing ${type}s from ${year}.`;
+const handleUpdateMessages = ({ date, count, type, file, memory, sendMessage }) => {
+  let isSendingUpdateMessage = (date.memoriesThisMonth % 10 === 0);
+
+  if (!date.month || date.month !== memory.Date.substring(5, 7)) {
+    date.month = memory.Date.substring(5, 7);
+    date.memoriesThisMonth = 1;
+    isSendingUpdateMessage = true;
+
+    if (!date.year || date.year !== memory.Date.substring(0, 4)) {
+      date.year = memory.Date.substring(0, 4);
     }
+  }
+  else {
+    date.memoriesThisMonth++;
+  }
+
+  if (isSendingUpdateMessage) {
+    const data = {
+      file,
+      count,
+      type,
+      message: `Processing ${type}s from ${constants.months[date.month]} ${date.year}`
+    };
 
     sendMessage(data);
   }

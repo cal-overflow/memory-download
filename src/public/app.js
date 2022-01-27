@@ -11,6 +11,10 @@ const navButton = document.getElementById('nav-button');
 const progressBar = document.getElementById('progress-bar');
 const openMemories = document.getElementById('open-memories-button');
 const doneMessage = document.getElementById('done-message');
+const preview = document.getElementById('preview');
+const photoPreview = document.querySelector('#preview img');
+const videoPreview1 = document.querySelector('#preview #video1');
+const videoPreview2 = document.querySelector('#preview #video2');
 
 let step = total = downloadLocation = 0;
 const failedMemories = [];
@@ -46,8 +50,12 @@ ipcRenderer.on('message', (event, data) => {
     message.innerHTML = data.message;
   }
 
+  if (data.file) {
+    handlePreviewFile(data)
+  }
+
   if (data.failedCombiningVideos) {
-    document.getElementById('failed-video-combination-message').classList.remove('invisible');
+    document.getElementById('failed-video-combination-message').classList.remove('d-none');
   }
 
   if (data.isComplete) {
@@ -109,6 +117,37 @@ const reEnableNavButton = () => {
   }
 };
 
+const handlePreviewFile = (data) => {
+  if (data.type === 'photo') {
+    photoPreview.setAttribute('src', data.file);
+  }
+  else {
+    if (!photoPreview.classList.contains('d-none')) {
+      videoPreview1.setAttribute('src', data.file);
+
+      photoPreview.classList.add('d-none');
+      videoPreview1.classList.remove('d-none');
+    }
+    else if (videoPreview1.classList.contains('d-none')) {
+      videoPreview1.setAttribute('src', data.file);
+
+      // Delay to ensure new video has loaded (more seamless transition)
+      setTimeout(() => {
+        videoPreview2.classList.add('d-none');
+        videoPreview1.classList.remove('d-none');
+      }, 100);
+    }
+    else {
+      videoPreview2.setAttribute('src', data.file);
+
+      setTimeout(() => {
+        videoPreview1.classList.add('d-none');
+        videoPreview2.classList.remove('d-none');
+      }, 100);
+    }
+  }
+};
+
 
 const handleDownloadComplete = (data) => {
   waitCard.classList.add('d-none');
@@ -159,3 +198,14 @@ downloadLocationButton.addEventListener('click', (event) => {
   event.preventDefault();
   ipcRenderer.send('chooseDownloadPath');
 });
+
+const togglePreviewZoom = () => {
+  const isPreviewAlreadyLarge = preview.style.height === '75vh';
+  const height = isPreviewAlreadyLarge ? '30vh' : '75vh';
+  const cursor =  isPreviewAlreadyLarge ? 'zoom-in' : 'zoom-out';
+
+  preview.style.height = height;
+  photoPreview.style.cursor = cursor;
+  videoPreview1.style.cursor = cursor;
+  videoPreview2.style.cursor = cursor;
+};
