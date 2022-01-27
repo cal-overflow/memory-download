@@ -27,9 +27,21 @@ const downloadMemories = async (filepath, outputDirectory, sendMessage) => {
   sendMessage({total});
 
   if (isDebugging) console.log(`Processing ${total} memories`);
+
+  let photos = [];
+  let videos = [];
+
+  for (memory of memories) {
+    if (memory['Media Type'] === 'Image') {
+      photos.push(memory);
+    }
+    else {
+      videos.push(memory);
+    }
+  }
   
-  await downloadPhotos(memories, sendMessage);
-  await downloadVideos(memories, sendMessage);
+  await downloadPhotos(photos, sendMessage);
+  await downloadVideos(videos, photos.length, sendMessage);
   const downloadInfo = await getOutputInfo();
 
   sendMessage({ total, isComplete: true, ...downloadInfo });
