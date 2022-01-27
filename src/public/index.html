@@ -91,6 +91,25 @@
               <div class="text-center">
                 <button id="choose-download-location-button" class="btn btn-dark my-2">Choose Download Folder</button>
               </div>
+              <p><small>
+                <a id="extra-options-button" class="text-dark" role="button">Additional settings</a>
+              </small></p>
+
+              <div id="extra-options" class="d-none d-flex flex-wrap">
+                <div class="w-50 p-4">
+                  <h5>Memory type</h5>
+                  <input type="checkbox" value="photos" name="photos" checked onclick="updateOptions()" />
+                  <label for="photos">Photos</label>
+                  <br />
+                  <input type="checkbox" value="videos" name="videos" checked onclick="updateOptions()" />
+                  <label for="videos">Videos</label>
+                </div>
+
+                <div class="w-50 p-4">
+                  <!-- <h5>More options here</h5> -->
+                </div>
+              </div>
+
             </form>
           </div>
 
@@ -99,24 +118,6 @@
             <div class="text-center">
               <div id="preview">
                 <img class="rounded h-100" onclick="togglePreviewZoom()" />
-                <video
-                  id="video1"
-                  class="rounded h-100 d-none"
-                  autoplay
-                  muted
-                  loop
-                  onclick="togglePreviewZoom()"
-                >
-                </video>
-                <video
-                  id="video2"
-                  class="rounded h-100 d-none"
-                  autoplay
-                  muted
-                  loop
-                  onclick="togglePreviewZoom()"
-                >
-                </video>
               </div>
 
               <p id="message">Downloading your memories...</p>
@@ -174,7 +175,7 @@
       <div class="container-sm mt-4">
         <p class="d-flex justify-content-between">
           <a href="https://youtu.be/0_1mJ3w5LaA" target="_blank" class="text-light text-decoration-none">Watch a tutorial</a>
-          <a href="http://www.christianlisle.com/contact?topic=Memory Download Feedback" target="_blank" class="text-light text-decoration-none">Provide feedback</a>
+          <a href="http://www.christianlisle.com/contact?memoryDownload=true" id="feedback-link" target="_blank" class="text-light text-decoration-none">Provide feedback</a>
           <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
         </p>
       </div>

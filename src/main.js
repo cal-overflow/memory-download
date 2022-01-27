@@ -42,12 +42,12 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
-  ipcMain.on('fileSelection', (event, {input, output}) => {
+  ipcMain.on('beginDownload', (event, {input, output, options}) => {
     if (isDebugging) console.log(`${input} selected as input\n${output} selected as download location`);
 
     window.webContents.send('message', {message: 'Beginning download'});
 
-    downloadMemories(input, output, sendMessage)
+    downloadMemories(input, output, options, sendMessage)
     .then(() => {
       if (isDebugging) console.log('Download complete');
     })
