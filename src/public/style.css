@@ -31,3 +31,6 @@ a.disabled {
 #preview img, #preview video {
   cursor: zoom-in;
 }
+.min-w-33 {
+  min-width: 33%;
+}
