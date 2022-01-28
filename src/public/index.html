@@ -112,7 +112,7 @@
           <div id="step-4" class="container-md d-none">
             <h4>Step 4: Wait while your memories are prepared for you</h4>
             <div class="text-center">
-              <div id="preview">
+              <div id="preview" class="d-none">
                 <img class="rounded h-100" onclick="togglePreviewZoom()" />
               </div>
 
@@ -124,14 +124,9 @@
               
               <p>
                 <small>
-                  This will take a while
+                  Processing <span id="total-memories"></span> files
                   <br />
-                  Do not close this window
-                </small>
-              </p>
-              <p>
-                <small id="failed-video-combination-message" class="d-none">
-                  There was an issue failing to combine videos together. This issue is being addressed and should be fixed in future versions of the app.
+                  <strong>Do not close this window</strong>
                 </small>
               </p>
             </div>
@@ -160,20 +155,26 @@
     </div>
 
     <div id="footer" class="container-fluid bg-dark text-center text-light py-4">
-      <p id="step-counter">
-        <span id="1" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(1);">1</span>
-        <span id="2" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(2);">2</span>
-        <span id="3" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(3);">3</span>
-        <span id="4" class="p-2 rounded bg-light text-dark" role="button">4</span>
-        <span id="5" class="p-2 rounded bg-light text-dark" role="button">5</span>
-      </p>
-      
-      <div class="container-sm mt-4">
-        <p class="d-flex justify-content-between">
-          <a href="https://youtu.be/0_1mJ3w5LaA" target="_blank" class="text-light text-decoration-none">Watch a tutorial</a>
-          <a href="http://www.christianlisle.com/contact?memoryDownload=true" id="feedback-link" target="_blank" class="text-light text-decoration-none">Provide feedback</a>
-          <a href="http://www.christianlisle.com" target="_blank" class="text-light text-decoration-none">Christian Lisle</a>
+      <div class="container-sm d-md-flex flex-row-reverse justify-content-evenly">
+        <p id="step-counter" class="min-w-33 mx-auto">
+          <span id="1" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(1);">1</span>
+          <span id="2" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(2);">2</span>
+          <span id="3" class="p-2 rounded bg-light text-dark" role="button" onclick="manualStepChange(3);">3</span>
+          <span id="4" class="p-2 rounded bg-light text-dark" role="button">4</span>
+          <span id="5" class="p-2 rounded bg-light text-dark" role="button">5</span>
         </p>
+        <p class="min-w-33 mx-auto"><a id="start-over" class="pt-1 text-light text-decoration-none d-none" role="button" onclick="manualStepChange(0);">Start over</a></p>
+        <p class="min-w-33 mx-auto"><a href="https://youtu.be/0_1mJ3w5LaA" target="_blank" class="pt-1 text-light text-decoration-none">Watch a tutorial</a></p>
+      </div>
+
+
+      <HR class="d-md-none" />
+      <div class="container-sm mt-4 d-md-flex justify-content-evenly text-secondary">
+        <p class="min-w-33 mx-auto"><a href="http://www.christianlisle.com/contact?memoryDownload=true" id="feedback-link" target="_blank" class="text-secondary text-decoration-none">Provide feedback</a></p>
+        <p class="font-monospace min-w-33 mx-auto">
+          <a id="version" href="https://github.com/ChristianLisle/memory-download/releases/" target="_blank" class="text-secondary text-decoration-none"></a>
+        </p>
+        <p class="min-w-33 mx-auto"><a href="http://www.christianlisle.com" target="_blank" class="text-secondary text-decoration-none">Christian Lisle</a></p>
       </div>
     </div>
   </body>
