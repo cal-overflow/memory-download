@@ -11,7 +11,6 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
@@ -27,6 +26,10 @@ const createWindow = () => {
     else shell.openExternal(url);
 
     return { action: 'deny' };
+  });
+
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('message', {version: app.getVersion()});
   });
 
   return win;
