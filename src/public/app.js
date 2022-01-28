@@ -13,12 +13,19 @@ const openMemories = document.getElementById('open-memories-button');
 const doneMessage = document.getElementById('done-message');
 const preview = document.getElementById('preview');
 const photoPreview = document.querySelector('#preview img');
+const extraOptionsButton = document.getElementById('extra-options-button');
+const extraOptions = document.getElementById('extra-options');
+const photosOption = document.querySelector('form [name="photos"]');
+const videosOption = document.querySelector('form [name="videos"]');
+const feedbackLink = document.getElementById('feedback-link');
+const startOverLink = document.getElementById('start-over');
+
+const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
 let step = total = downloadLocation = 0;
 const failedMemories = [];
 
 ipcRenderer.on('message', (event, data) => {
-
   if (data.downloadLocation) {
     downloadLocation = data.downloadLocation;
     reEnableNavButton();
@@ -26,8 +33,10 @@ ipcRenderer.on('message', (event, data) => {
 
   if (data.total) {
     progress.classList.remove('d-none');
+    feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.total}&photos=${photosOption.checked}&videos=${videosOption.checked}`);
 
     total = data.total;
+    document.getElementById('total-memories').innerHTML = total;
   }
 
   if (data.count) {
@@ -62,9 +71,10 @@ ipcRenderer.on('message', (event, data) => {
 });
 
 const handleStepChange = (i) => {
-  if (step == 5) ipcRenderer.send('reload');
+  if (i == 0 || step == 5) ipcRenderer.send('reload');
 
   else if (i !== 4) {
+    startOverLink.classList.remove('d-none');
     document.getElementById(`step-${step}`).classList.add('d-none');
 
     if (step !== 0) document.getElementById(`${step}`).classList.toggle('bg-light');
@@ -73,7 +83,11 @@ const handleStepChange = (i) => {
     document.getElementById(`step-${i}`).classList.remove('d-none');
     document.getElementById(`${i}`).classList.toggle('bg-light');
     document.getElementById(`${i}`).classList.toggle('text-dark');
-    if (i === 1) navButton.innerHTML = 'Continue';
+    if (i === 1 || i == 2) {
+      navButton.innerHTML = 'Continue';
+      navButton.classList.remove('disabled');
+    }
+
     if (i === 3) {
       navButton.innerHTML = 'Begin download';
       navButton.classList.add('disabled');
@@ -95,10 +109,15 @@ const handleStepChange = (i) => {
     navButton.classList.add('d-none');
     document.getElementById(`step-3`).classList.toggle('d-none');
 
-    ipcRenderer.send('fileSelection', {
+    ipcRenderer.send('beginDownload', {
       input: fileUpload.files[0].path,
       output: downloadLocation,
+      options: {
+        photos: photosOption.checked,
+        videos: videosOption.checked
+      }
     });
+    startOverLink.classList.add('d-none');
     step = i;
   }
 };
@@ -113,17 +132,37 @@ const reEnableNavButton = () => {
   if (fileUpload.value && downloadLocation) {
     navButton.classList.remove('disabled');
   }
+  else if (!navButton.classList.contains('disabled')) {
+    navButton.classList.add('disabled');
+    
+  }
+};
+
+const updateOptions = () => {
+  if (photosOption.checked && videosOption.checked) {
+    photosOption.removeAttribute('disabled');
+    videosOption.removeAttribute('disabled');
+  }
+
+  if (!photosOption.checked) {
+    videosOption.setAttribute('disabled', null);
+  }
+
+  if (!videosOption.checked) {
+    photosOption.setAttribute('disabled', null);
+  }
+    // return photosOption.checked || videosOption.checked;
 };
 
 const handlePreviewFile = (data) => {
   if (data.type === 'photo') {
+    preview.classList.remove('d-none');
     photoPreview.setAttribute('src', data.file);
   }
-  else if (!preview.classList.contains('d-none')) {
+  else {
     preview.classList.add('d-none');
   }
 };
-
 
 const handleDownloadComplete = (data) => {
   waitCard.classList.add('d-none');
@@ -173,6 +212,12 @@ fileUpload.addEventListener('change', reEnableNavButton);
 downloadLocationButton.addEventListener('click', (event) => {
   event.preventDefault();
   ipcRenderer.send('chooseDownloadPath');
+});
+
+extraOptionsButton.addEventListener('click', (event) => {
+  event.preventDefault();
+  extraOptions.classList.remove('d-none');
+  extraOptionsButton.classList.add('d-none');
 });
 
 const togglePreviewZoom = () => {

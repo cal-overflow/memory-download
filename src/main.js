@@ -1,3 +1,4 @@
+const path = require('path');
 const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
 const { downloadMemories } = require('./memoryDownloader');
 
@@ -10,6 +11,7 @@ const createWindow = () => {
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
       contextIsolation: false,
       enableRemoteModule: true,
@@ -42,12 +44,12 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 
-  ipcMain.on('fileSelection', (event, {input, output}) => {
+  ipcMain.on('beginDownload', (event, {input, output, options}) => {
     if (isDebugging) console.log(`${input} selected as input\n${output} selected as download location`);
 
     window.webContents.send('message', {message: 'Beginning download'});
 
-    downloadMemories(input, output, sendMessage)
+    downloadMemories(input, output, options, sendMessage)
     .then(() => {
       if (isDebugging) console.log('Download complete');
     })
