@@ -18,6 +18,7 @@ const extraOptions = document.getElementById('extra-options');
 const photosOption = document.querySelector('form [name="photos"]');
 const videosOption = document.querySelector('form [name="videos"]');
 const feedbackLink = document.getElementById('feedback-link');
+const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
@@ -35,6 +36,7 @@ ipcRenderer.on('message', (event, data) => {
     feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.total}&photos=${photosOption.checked}&videos=${videosOption.checked}`);
 
     total = data.total;
+    document.getElementById('total-memories').innerHTML = total;
   }
 
   if (data.count) {
@@ -69,9 +71,10 @@ ipcRenderer.on('message', (event, data) => {
 });
 
 const handleStepChange = (i) => {
-  if (step == 5) ipcRenderer.send('reload');
+  if (i == 0 || step == 5) ipcRenderer.send('reload');
 
   else if (i !== 4) {
+    startOverLink.classList.remove('d-none');
     document.getElementById(`step-${step}`).classList.add('d-none');
 
     if (step !== 0) document.getElementById(`${step}`).classList.toggle('bg-light');
@@ -114,6 +117,7 @@ const handleStepChange = (i) => {
         videos: videosOption.checked
       }
     });
+    startOverLink.classList.add('d-none');
     step = i;
   }
 };
@@ -152,9 +156,10 @@ const updateOptions = () => {
 
 const handlePreviewFile = (data) => {
   if (data.type === 'photo') {
+    preview.classList.remove('d-none');
     photoPreview.setAttribute('src', data.file);
   }
-  else if (!preview.classList.contains('d-none')) {
+  else {
     preview.classList.add('d-none');
   }
 };
