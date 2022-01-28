@@ -26,6 +26,10 @@ let step = total = downloadLocation = 0;
 const failedMemories = [];
 
 ipcRenderer.on('message', (event, data) => {
+  if (data.version) {
+    document.getElementById('version').innerHTML = data.version;
+  }
+
   if (data.downloadLocation) {
     downloadLocation = data.downloadLocation;
     reEnableNavButton();
