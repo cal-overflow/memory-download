@@ -164,16 +164,6 @@ const handlePreviewFile = (data) => {
   }
 };
 
-const handlePreviewFile = (data) => {
-  if (data.type === 'photo') {
-    photoPreview.setAttribute('src', data.file);
-  }
-  else if (!preview.classList.contains('d-none')) {
-    preview.classList.add('d-none');
-  }
-};
-
-
 const handleDownloadComplete = (data) => {
   waitCard.classList.add('d-none');
 
