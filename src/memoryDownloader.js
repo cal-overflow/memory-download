@@ -17,7 +17,10 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
   const data = getMemoryDataFromJSON(filepath);
   
   if (!data['Saved Media']) {
-    sendMessage({error: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.'});
+    sendMessage({
+      error: new Error('Invalid memories_history.json file provided. No "Saved Media" found.'),
+      message: 'Unable to parse the file you provided.<br />Please try uploading the <tt>memories_history.json</tt> file again.',
+    });
     return;
   }
   
@@ -38,7 +41,11 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
   if (options.photos) total += photos.length;
   if (options.videos) total += videos.length;
   
-  sendMessage({ total });
+  sendMessage({
+    photos: photos.length,
+    videos: videos.length,
+    total
+  });
   if (isDebugging) console.log(`Processing ${total} memories`);
 
   if (options.photos) {
