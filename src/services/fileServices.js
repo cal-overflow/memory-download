@@ -27,19 +27,21 @@ const getFileName = async (memory, isConcatenatedVideo=false) => {
   if (!fs.existsSync(outputDirectory))
     throw new Error(`Output directory "${outputDirectory}" does not exist`);
 
-  if (!fs.existsSync(`${outputDirectory}/${year}`)) {
-    fs.mkdirSync(`${outputDirectory}/${year}`);
+  const parentDirectory = path.join(outputDirectory, year);
+
+  if (!fs.existsSync(parentDirectory)) {
+    fs.mkdirSync(parentDirectory);
   }
 
-  fileName = `${year}/${month}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
+  fileName = `${month}-${day}${isPhoto || isConcatenatedVideo ? '' : '-short'}`;
 
   let i = 1;
   let confirmedFileName = fileName;
-  while (fs.existsSync(`${outputDirectory}/${confirmedFileName}.${extension}`)) {
+  while (fs.existsSync(path.join(parentDirectory, `${confirmedFileName}.${extension}`))) {
     confirmedFileName = `${fileName}-${i++}`;
   }
 
-  return path.resolve(`${outputDirectory}/${confirmedFileName}.${extension}`);
+  return path.join(parentDirectory, `${confirmedFileName}.${extension}`);
 };
 
 const writeFile = async (file, data) => {

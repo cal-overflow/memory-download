@@ -73,7 +73,7 @@ app.whenReady().then(() => {
     })
     .then((res) => {
       window.webContents.send('message', {
-        downloadLocation: res.filePaths[0]
+        downloadLocation: path.resolve(res.filePaths[0])
       });
 
     });
