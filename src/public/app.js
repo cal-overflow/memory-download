@@ -53,7 +53,8 @@ ipcRenderer.on('message', (event, data) => {
   }
 
   if (data.error) {
-    showErrorMessage(data.error);
+    showErrorMessage(data);
+    return;
   }
 
   if (data.failedMemory) {
@@ -203,10 +204,11 @@ const handleDownloadComplete = (data) => {
   }
 };
 
-const showErrorMessage = (errorMessage) => {
+const showErrorMessage = ({ message, error }) => {
   waitCard.classList.add('d-none');
 
-  errorText.innerHTML = errorMessage;
+  errorText.innerHTML = message;
+  document.querySelector('#extra-error-information pre').innerHTML = error.message;
   errorCard.classList.remove('d-none');
 };
 
