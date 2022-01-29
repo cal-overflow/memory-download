@@ -38,7 +38,11 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
   if (options.photos) total += photos.length;
   if (options.videos) total += videos.length;
   
-  sendMessage({ total });
+  sendMessage({
+    photos: photos.length,
+    videos: videos.length,
+    total
+  });
   if (isDebugging) console.log(`Processing ${total} memories`);
 
   if (options.photos) {
