@@ -22,7 +22,7 @@ const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
-let step = total = downloadLocation = 0;
+let step = photos = videos = total = downloadLocation = 0;
 const failedMemories = [];
 
 ipcRenderer.on('message', (event, data) => {
@@ -37,8 +37,11 @@ ipcRenderer.on('message', (event, data) => {
 
   if (data.total) {
     progress.classList.remove('d-none');
-    feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.total}&photos=${photosOption.checked}&videos=${videosOption.checked}`);
 
+    if (data.photos || data.videos) {
+      feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.total}&photos=${data.photos}&videos=${data.videos}`);
+    }
+    
     total = data.total;
     document.getElementById('total-memories').innerHTML = total;
   }
@@ -50,7 +53,8 @@ ipcRenderer.on('message', (event, data) => {
   }
 
   if (data.error) {
-    showErrorMessage(data.error);
+    showErrorMessage(data);
+    return;
   }
 
   if (data.failedMemory) {
@@ -200,10 +204,11 @@ const handleDownloadComplete = (data) => {
   }
 };
 
-const showErrorMessage = (errorMessage) => {
+const showErrorMessage = ({ message, error }) => {
   waitCard.classList.add('d-none');
 
-  errorText.innerHTML = errorMessage;
+  errorText.innerHTML = message;
+  document.querySelector('#extra-error-information pre').innerHTML = error.message;
   errorCard.classList.remove('d-none');
 };
 
