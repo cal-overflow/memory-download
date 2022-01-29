@@ -59,7 +59,10 @@ app.whenReady().then(() => {
     .catch((err) => {
       if (isDebugging) console.log(`An error occurred while downloading memories. Error: ${err.message}`);
 
-      window.webContents.send('message', {error: 'An unknown error occurred while processing your memories.<br />Please try again'});
+      window.webContents.send('message', {
+        message: 'An unknown error occurred while processing your memories.<br />Please try again',
+        error: err
+      });
     });
   });
 
