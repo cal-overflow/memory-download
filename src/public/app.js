@@ -69,8 +69,9 @@ ipcRenderer.on('message', (event, data) => {
     handlePreviewFile(data)
   }
 
-  if (data.failedCombiningVideos) {
-    document.getElementById('failed-video-combination-message').classList.remove('d-none');
+  if (data.smallError) {
+    document.querySelector('#small-error-feedback pre').innerHTML = data.smallError.message;
+    document.getElementById('small-error-feedback').classList.remove('d-none');
   }
 
   if (data.isComplete) {
