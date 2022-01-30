@@ -27,7 +27,7 @@ const getFileName = async (memory, isConcatenatedVideo=false) => {
   if (!fs.existsSync(outputDirectory))
     throw new Error(`Output directory "${outputDirectory}" does not exist`);
 
-  const parentDirectory = path.join(outputDirectory, year);
+  const parentDirectory = path.normalize(path.join(outputDirectory, year));
 
   if (!fs.existsSync(parentDirectory)) {
     fs.mkdirSync(parentDirectory);
@@ -37,11 +37,11 @@ const getFileName = async (memory, isConcatenatedVideo=false) => {
 
   let i = 1;
   let confirmedFileName = fileName;
-  while (fs.existsSync(path.join(parentDirectory, `${confirmedFileName}.${extension}`))) {
+  while (fs.existsSync(path.normalize(path.join(parentDirectory, `${confirmedFileName}.${extension}`)))) {
     confirmedFileName = `${fileName}-${i++}`;
   }
 
-  return path.join(parentDirectory, `${confirmedFileName}.${extension}`);
+  return path.normalize(path.join(parentDirectory, `${confirmedFileName}.${extension}`));
 };
 
 const writeFile = async (file, data) => {
