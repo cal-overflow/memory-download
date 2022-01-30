@@ -110,7 +110,7 @@ const downloadVideos = async (videos, countOffset, sendMessage) => {
       .catch((err) => {
         sendMessage({
           message: `There was an issue combining ${clips.length} clips into a single video file.<br /><strong>Don't worry!</strong> The video clips will be saved individually.`,
-          failedCombiningVideos: true,
+          smallError: err,
         });
 
         if (isDebugging) {
