@@ -3,6 +3,7 @@ const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
 const { downloadMemories } = require('./memoryDownloader');
 
 const isDebugging = process.env.DEBUG_MODE;
+let isProcessingMemories = false;
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -32,6 +33,23 @@ const createWindow = () => {
     win.webContents.send('message', {version: app.getVersion()});
   });
 
+  win.on('close', (event) => {
+    if (isProcessingMemories) {
+      const choice = dialog.showMessageBoxSync(win, {
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        defaultId: 1,
+        title: 'Confirm',
+        message: 'Are you sure you want to quit?',
+        detail: 'Your download will be interrupted.'
+      });
+
+      if (choice === 1) {
+        event.preventDefault();
+      }
+    }
+  });
+
   return win;
 };
 
@@ -51,6 +69,7 @@ app.whenReady().then(() => {
     if (isDebugging) console.log(`${input} selected as input\n${output} selected as download location`);
 
     window.webContents.send('message', {message: 'Beginning download'});
+    isProcessingMemories = true;
 
     downloadMemories(input, output, options, sendMessage)
     .then(() => {
@@ -62,6 +81,9 @@ app.whenReady().then(() => {
       window.webContents.send('message', {
         message: 'An unknown error occurred while processing your memories.<br />Please try again',
         error: err
+      })
+      .finally(() => {
+        isProcessingMemories = false;
       });
     });
   });
