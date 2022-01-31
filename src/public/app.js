@@ -75,7 +75,12 @@ ipcRenderer.on('message', (event, data) => {
   }
 
   if (data.isComplete) {
-    handleDownloadComplete(data);
+    if (data.total === failedMemories.length) {
+      showErrorMessage({
+        message: 'The input file provided is expired<br />Be sure to use data from your Snapchat account that was downloaded within the last 7 days',
+      });
+    }
+    else handleDownloadComplete(data);
   }
 });
 
@@ -209,7 +214,11 @@ const showErrorMessage = ({ message, error }) => {
   waitCard.classList.add('d-none');
 
   errorText.innerHTML = message;
-  document.querySelector('#extra-error-information pre').innerHTML = error.message;
+
+  if (error) {
+    document.querySelector('#extra-error-information pre').innerHTML = error.message;
+  }
+
   errorCard.classList.remove('d-none');
 };
 
