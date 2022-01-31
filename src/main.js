@@ -56,10 +56,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   const window = createWindow();
 
-  app.on('window-all-closed', () => {
-    // Close the application entirely given all windows closed (with the exception of macOS-darwin)
-    if (process.platform !== 'darwin') app.quit();
-  });
+  app.on('window-all-closed', app.quit);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
