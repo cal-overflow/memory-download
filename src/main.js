@@ -78,10 +78,10 @@ app.whenReady().then(() => {
       window.webContents.send('message', {
         message: 'An unknown error occurred while processing your memories.<br />Please try again',
         error: err
-      })
-      .finally(() => {
-        isProcessingMemories = false;
       });
+    })
+    .finally(() => {
+      isProcessingMemories = false;
     });
   });
 
