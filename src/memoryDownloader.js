@@ -40,21 +40,26 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
 
   if (options.photos) total += photos.length;
   if (options.videos) total += videos.length;
-  
+
   sendMessage({
     photos: photos.length,
     videos: videos.length,
     total
   });
+
   if (isDebugging) console.log(`Processing ${total} memories`);
 
-  if (options.photos) {
-    await downloadPhotos(photos, sendMessage);
+  if (options.concurrent) {
+    await Promise.all([downloadPhotos(photos, sendMessage), downloadVideos(videos, sendMessage)]);
   }
-
-  if (options.videos) {
-    const countOffset = options.photos ? photos.length : 0;
-    await downloadVideos(videos, countOffset, sendMessage);
+  else {
+    if (options.photos) {
+      await downloadPhotos(photos, sendMessage);
+    }
+  
+    if (options.videos) {
+      await downloadVideos(videos, sendMessage);
+    }
   }
 
   const downloadInfo = await getOutputInfo();

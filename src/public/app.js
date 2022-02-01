@@ -13,16 +13,20 @@ const openMemories = document.getElementById('open-memories-button');
 const doneMessage = document.getElementById('done-message');
 const preview = document.getElementById('preview');
 const photoPreview = document.querySelector('#preview img');
+
 const extraOptionsButton = document.getElementById('extra-options-button');
 const extraOptions = document.getElementById('extra-options');
 const photosOption = document.querySelector('form [name="photos"]');
 const videosOption = document.querySelector('form [name="videos"]');
+const concurrentOption = document.querySelector('form [name="concurrent"]');
+
 const feedbackLink = document.getElementById('feedback-link');
 const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
-let step = photos = videos = total = downloadLocation = 0;
+let step = photos = videos = total = downloadLocation = prevConcurrentSetting = 0;
+let count = { photos: 0, videos: 0 };
 const failedMemories = [];
 
 ipcRenderer.on('message', (event, data) => {
@@ -47,7 +51,14 @@ ipcRenderer.on('message', (event, data) => {
   }
 
   if (data.count) {
-    const percent = `${parseInt((data.count / total) * 100)}%`;
+    if (data.type === 'photo') {
+      count.photos = data.count;
+    }
+    else if (data.type === 'video') {
+      count.videos = data.count;
+    }
+
+    const percent = `${parseInt(((count.photos + count.videos) / total) * 100)}%`;
     progressBar.style.width = percent;
     progress.innerHTML = percent; 
   }
@@ -128,7 +139,8 @@ const handleStepChange = (i) => {
       output: downloadLocation,
       options: {
         photos: photosOption.checked,
-        videos: videosOption.checked
+        videos: videosOption.checked,
+        concurrent: concurrentOption.checked,
       }
     });
     startOverLink.classList.add('d-none');
@@ -152,20 +164,34 @@ const reEnableNavButton = () => {
   }
 };
 
-const updateOptions = () => {
+const updateOptions = (option) => {
+  if (option === 'concurrent' && photosOption.checked && videosOption.checked) {
+    const prev = concurrentOption.checked;
+    concurrentOption.checked = prevConcurrentSetting;
+    prevConcurrentSetting = prev;
+  }
   if (photosOption.checked && videosOption.checked) {
     photosOption.removeAttribute('disabled');
     videosOption.removeAttribute('disabled');
+    concurrentOption.removeAttribute('disabled');
+    concurrentOption.checked = prevConcurrentSetting;
   }
 
   if (!photosOption.checked) {
+    prevConcurrentSetting = concurrentOption.checked;
+    concurrentOption.checked = false;
+
+    concurrentOption.setAttribute('disabled', null);
     videosOption.setAttribute('disabled', null);
   }
-
+  
   if (!videosOption.checked) {
+    prevConcurrentSetting = concurrentOption.checked;
+    concurrentOption.checked = false;
+
+    concurrentOption.setAttribute('disabled', null);
     photosOption.setAttribute('disabled', null);
   }
-    // return photosOption.checked || videosOption.checked;
 };
 
 const handlePreviewFile = (data) => {

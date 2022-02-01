@@ -74,7 +74,7 @@ const downloadPhotos = async (photos, sendMessage) => {
   }
 };
 
-const downloadVideos = async (videos, countOffset, sendMessage) => {
+const downloadVideos = async (videos, sendMessage) => {
   const type = 'video';
   const date = {};
   let prevMemory, fileName, prevUrl, prevFileName;
@@ -135,9 +135,8 @@ const downloadVideos = async (videos, countOffset, sendMessage) => {
       memory: video,
       sendMessage,
       type,
-      count: i + countOffset,
+      count: i,
       date,
-      file: fileName,
     });
 
     prevUrl = url;
