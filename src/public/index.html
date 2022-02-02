@@ -93,13 +93,18 @@
               </small></p>
 
               <div id="extra-options" class="d-none d-flex flex-wrap">
-                <div class="p-4">
+                <div class="p-4 w-50">
                   <h6>Memory type</h6>
-                  <input type="checkbox" value="photos" name="photos" checked onclick="updateOptions()" />
+                  <input type="checkbox" value="photos" name="photos" checked onclick="updateOptions('photos')" />
                   <label for="photos">Photos</label>
                   <br />
-                  <input type="checkbox" value="videos" name="videos" checked onclick="updateOptions()" />
+                  <input type="checkbox" value="videos" name="videos" checked onclick="updateOptions('videos')" />
                   <label for="videos">Videos</label>
+                </div>
+                <div class="p-4 w-50">
+                  <h6>Advanced options</h6>
+                  <input type="checkbox" value="concurrent" name="concurrent" checked onclick="updateOptions('concurrent')" />
+                  <label for="concurrent">Concurrent downloads</label>
                 </div>
               </div>
 
