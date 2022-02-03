@@ -65,7 +65,7 @@ app.whenReady().then(() => {
   ipcMain.on('beginDownload', (event, {input, output, options}) => {
     if (isDebugging) console.log(`${input} selected as input\n${output} selected as download location`);
 
-    window.webContents.send('message', {message: 'Beginning download'});
+    window.webContents.send('message', {message: 'Downloading memories'});
     isProcessingMemories = true;
 
     downloadMemories(input, output, options, sendMessage)
@@ -78,10 +78,10 @@ app.whenReady().then(() => {
       window.webContents.send('message', {
         message: 'An unknown error occurred while processing your memories.<br />Please try again',
         error: err
-      })
-      .finally(() => {
-        isProcessingMemories = false;
       });
+    })
+    .finally(() => {
+      isProcessingMemories = false;
     });
   });
 
