@@ -114,7 +114,7 @@ ipcRenderer.on('message', (event, data) => {
   }
 
   if (data.isComplete) {
-    if (data.total === failedMemories.length) {
+    if (total === failedMemories.length) {
       showErrorMessage({
         message: 'The input file provided is expired<br />Be sure to use data from your Snapchat account that was downloaded within the last 7 days',
       });
