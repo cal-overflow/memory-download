@@ -171,6 +171,7 @@ const handleStepChange = (i) => {
         concurrent: concurrentOption.checked,
       }
     });
+    document.getElementById('donation-link').classList.remove('d-none');
     startOverLink.classList.add('d-none');
     step = i;
   }
