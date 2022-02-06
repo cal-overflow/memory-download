@@ -67,9 +67,10 @@ const downloadPhotos = async (photos, sendMessage) => {
       memory: photo,
       sendMessage,
       type,
-      count: i,
+      count: i + 1,
       date,
       file: fileName,
+      total: photos.length
     });
   }
 };
@@ -135,18 +136,19 @@ const downloadVideos = async (videos, sendMessage) => {
       memory: video,
       sendMessage,
       type,
-      count: i,
+      count: i + 1,
       date,
+      total: videos.length
     });
-
+    
     prevUrl = url;
     prevMemory = video;
     prevFileName = fileName;
   }
 };
 
-const handleUpdateMessages = ({ date, count, type, file, memory, sendMessage }) => {
-  let isSendingUpdateMessage = (date.memoriesThisMonth % 10 === 0);
+const handleUpdateMessages = ({ date, count, total, type, file, memory, sendMessage }) => {
+  let isSendingUpdateMessage = (date.memoriesThisMonth % 10 === 0) || (count === 1) || (count === total);
 
   if (!date.month || date.month !== memory.Date.substring(5, 7)) {
     date.month = memory.Date.substring(5, 7);
@@ -166,7 +168,11 @@ const handleUpdateMessages = ({ date, count, type, file, memory, sendMessage }) 
       file,
       count,
       type,
-      date: date,
+      date: {
+        year: date.year,
+        month: constants.months[date.month]
+      },
+      total: (count === 1) ? total : undefined
     });
   }
 };

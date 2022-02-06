@@ -74,7 +74,7 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
     sendMessage({
       photos: photoCount,
       videos: videoCount,
-      total,
+      totalMemories: total,
       message: 'Downloading photos and videos'
     });
 
@@ -101,7 +101,7 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
     sendMessage({
       photos: photos.length,
       videos: videos.length,
-      total
+      totalMemories: total
     });
 
     if (isDebugging) console.log(`Processing ${total} memories`);
