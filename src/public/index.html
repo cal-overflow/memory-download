@@ -95,16 +95,38 @@
               <div id="extra-options" class="d-none d-flex flex-wrap">
                 <div class="p-4 w-50">
                   <h6>Memory type</h6>
-                  <input type="checkbox" value="photos" name="photos" checked onclick="updateOptions('photos')" />
+                  <input type="checkbox" name="photos" checked onclick="updateOptions('photos')" />
                   <label for="photos">Photos</label>
+
                   <br />
-                  <input type="checkbox" value="videos" name="videos" checked onclick="updateOptions('videos')" />
+
+                  <input type="checkbox" name="videos" checked onclick="updateOptions('videos')" />
                   <label for="videos">Videos</label>
                 </div>
                 <div class="p-4 w-50">
                   <h6>Advanced options</h6>
-                  <input type="checkbox" value="concurrent" name="concurrent" checked onclick="updateOptions('concurrent')" />
+                  <input
+                    type="checkbox"
+                    name="concurrent"
+                    checked
+                    onclick="updateOptions('concurrent')"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    title="Download multiple memories at the same time"
+                  />
                   <label for="concurrent">Concurrent downloads</label>
+
+                  <br />
+
+                  <input
+                    type="checkbox"
+                    name="progress-updates"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="left"
+                    data-bs-html="true"
+                    title="Show detailed updates as your download progresses<HR><small>Requires concurrent downloads</small>"
+                    />
+                  <label for="progress-updates">Progress updates</label>
                 </div>
               </div>
 
@@ -114,11 +136,28 @@
           <div id="step-4" class="container-md d-none">
             <h4>Step 4: Wait while your memories are prepared for you</h4>
             <div class="text-center">
-              <div id="preview" class="d-none">
-                <img class="rounded h-100" onclick="togglePreviewZoom()" />
-              </div>
+              <div class="row align-items-center">
+                <div id="preview" class="d-none col-md" >
+                  <img class="rounded h-100" onclick="togglePreviewZoom()" title="Zoom" />
+                </div>
+
+                <div id="advanced-progress-updates" class="d-none col-md">
+                  <table class="table table-dark table-borderless table-hover align-middle rounded m-2">
+                    <thead>
+                      <tr>
+                        <th>Year</th>
+                        <th>Photos</th>
+                        <th>Videos</th>
+                      </tr>
+                    </thead>
+  
+                    <tbody></tbody>
+                  </table>
+                </div>
+                </div>
 
               <p id="message">Downloading your memories...</p>
+
               <div class="progress">
                 <div id="progress-bar" class="progress-bar bg-dark" role="progressbar" style="width: 0%"></div>
               </div>
@@ -197,3 +236,10 @@
 <noscript>You must enable JavaScript to use all features of this application.</noscript>
 <script type="text/javascript" src="app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script>
+  // Enable custom tooltips styling with Bootstrap
+  var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+  var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+  })
+</script>

@@ -19,13 +19,14 @@ const extraOptions = document.getElementById('extra-options');
 const photosOption = document.querySelector('form [name="photos"]');
 const videosOption = document.querySelector('form [name="videos"]');
 const concurrentOption = document.querySelector('form [name="concurrent"]');
+const progressUpdatesOption = document.querySelector('form [name="progress-updates"]');
 
 const feedbackLink = document.getElementById('feedback-link');
 const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
-let step = photos = videos = total = downloadLocation = prevConcurrentSetting = 0;
+let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevProgressUpdatesSetting = 0;
 const count = {
   allTime: {
     photos: 0,
@@ -44,25 +45,76 @@ ipcRenderer.on('message', (event, data) => {
     reEnableNavButton();
   }
 
-  if (data.total) {
+  if (data.totalMemories) {
     progress.classList.remove('d-none');
+  
+      if (data.photos || data.videos) {
+        feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.totalMemories}&photos=${data.photos}&videos=${data.videos}`);
+      }
+      
+      total = data.totalMemories;
+      document.getElementById('total-memories').innerHTML = total;
+  }
 
-    if (data.photos || data.videos) {
-      feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.total}&photos=${data.photos}&videos=${data.videos}`);
+  if (data.total) {
+    if (data.date?.year) {
+      if (!count[data.date.year]) {
+        count[data.date.year] = {
+          photos: 0,
+          videos: 0,
+          photoTotal: 0,
+          videoTotal: 0,
+        };
+      }
+      if (data.date?.year && data.type) {
+        count[data.date.year][`${data.type}Total`] = data.total;
+        total += data.total;
+      }
     }
-    
-    total = data.total;
-    document.getElementById('total-memories').innerHTML = total;
   }
 
   if (data.count) {
     let currentCount = 0;
 
     if (concurrentOption.checked) {
-      if (!count[data.date.year]) {
-        count[data.date.year] = { photos: 0, videos: 0 };
-      }
+      if (progressUpdatesOption.checked) {
+        document.getElementById('advanced-progress-updates').classList.remove('d-none');
+
+        if (!document.getElementById(`year-${data.date.year}`)) {
+          const row = document.createElement('tr');
+          row.setAttribute('id', `year-${data.date.year}`);
   
+          const year = document.createElement('td');
+          year.innerHTML = data.date.year;
+  
+          const emptyPhoto = document.createElement('td');
+          const emptyVideo = document.createElement('td');
+          emptyPhoto.classList.add('photo');
+          emptyVideo.classList.add('video');
+          emptyPhoto.innerHTML = emptyVideo.innerHTML = '0 / 0';
+  
+          row.append(year, emptyPhoto, emptyVideo);
+
+          const table = document.querySelector('#advanced-progress-updates tbody');
+          const rows = table.children;
+
+          if (rows.length) {
+            for (let i = 0; i < rows.length; i++) {
+              if (rows[i].id > `year-${data.date.year}`) {
+                table.insertBefore(row, rows[i]);
+                break;
+              }
+              if (i === rows.length - 1) {
+                table.appendChild(row);
+              }
+            }
+          }
+          else table.appendChild(row);
+        }
+  
+        document.querySelector(`#year-${data.date.year} .${data.type}`).innerHTML = `${data.count} / ${count[data.date.year][`${data.type}Total`]}`;
+      }
+
       if (data.type === 'photo') {
         count[data.date.year].photos = data.count;
       }
@@ -73,7 +125,6 @@ ipcRenderer.on('message', (event, data) => {
       for (year in count) {
         currentCount += (count[year].photos + count[year].videos);
       }
-  
     }
     else {
       if (data.type === 'photo') {
@@ -88,7 +139,7 @@ ipcRenderer.on('message', (event, data) => {
 
     percent = `${parseInt((currentCount / total) * 100)}%`;
     progressBar.style.width = percent;
-    progress.innerHTML = percent; 
+    progress.innerHTML = percent;
   }
 
   if (data.error) {
@@ -194,31 +245,52 @@ const reEnableNavButton = () => {
 };
 
 const updateOptions = (option) => {
-  if (option === 'concurrent' && photosOption.checked && videosOption.checked) {
-    const prev = concurrentOption.checked;
-    concurrentOption.checked = prevConcurrentSetting;
-    prevConcurrentSetting = prev;
-  }
   if (photosOption.checked && videosOption.checked) {
-    photosOption.removeAttribute('disabled');
-    videosOption.removeAttribute('disabled');
-    concurrentOption.removeAttribute('disabled');
-    concurrentOption.checked = prevConcurrentSetting;
+    if (option === 'concurrent') {
+      if (concurrentOption.checked) {
+        progressUpdatesOption.checked = prevProgressUpdatesSetting;
+        progressUpdatesOption.removeAttribute('disabled');
+      }
+      else {
+        prevProgressUpdatesSetting = progressUpdatesOption.checked;
+        progressUpdatesOption.checked = false;
+        progressUpdatesOption.setAttribute('disabled', null);
+      }
+    
+      prevConcurrentSetting = concurrentOption.checked;
+    }
+    else {
+      photosOption.removeAttribute('disabled');
+      videosOption.removeAttribute('disabled');
+      concurrentOption.removeAttribute('disabled');
+      progressUpdatesOption.removeAttribute('disabled');
+
+      concurrentOption.checked = prevConcurrentSetting;
+      progressUpdatesOption.checked = prevProgressUpdatesSetting;
+    }
   }
 
   if (!photosOption.checked) {
     prevConcurrentSetting = concurrentOption.checked;
+    prevProgressUpdatesSetting = progressUpdatesOption.checked;
+    
     concurrentOption.checked = false;
+    progressUpdatesOption.checked = false;
 
     concurrentOption.setAttribute('disabled', null);
+    progressUpdatesOption.setAttribute('disabled', null);
     videosOption.setAttribute('disabled', null);
   }
   
   if (!videosOption.checked) {
     prevConcurrentSetting = concurrentOption.checked;
+    prevProgressUpdatesSetting = progressUpdatesOption.checked;
+    
     concurrentOption.checked = false;
+    progressUpdatesOption.checked = false;
 
     concurrentOption.setAttribute('disabled', null);
+    progressUpdatesOption.setAttribute('disabled', null);
     photosOption.setAttribute('disabled', null);
   }
 };
