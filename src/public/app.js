@@ -35,9 +35,11 @@ const count = {
   }
 };
 const failedMemories = [];
+let appVersion = undefined;
 
 ipcRenderer.on('message', (event, data) => {
   if (data.version) {
+    appVersion = data.version;
     document.getElementById('version').innerHTML = data.version;
   }
 
@@ -50,7 +52,7 @@ ipcRenderer.on('message', (event, data) => {
     progress.classList.remove('d-none');
   
       if (data.photos || data.videos) {
-        feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.totalMemories}&photos=${data.photos}&videos=${data.videos}`);
+        feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.totalMemories}&photos=${data.photos}&videos=${data.videos}&version=${appVersion}`);
       }
       
       total = data.totalMemories;
