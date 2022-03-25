@@ -18,6 +18,7 @@ const extraOptionsButton = document.getElementById('extra-options-button');
 const extraOptions = document.getElementById('extra-options');
 const photosOption = document.querySelector('form [name="photos"]');
 const videosOption = document.querySelector('form [name="videos"]');
+const showPreviewsOption = document.querySelector('form [name="previews"]')
 const concurrentOption = document.querySelector('form [name="concurrent"]');
 const progressUpdatesOption = document.querySelector('form [name="progress-updates"]');
 
@@ -26,7 +27,7 @@ const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
 
-let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevProgressUpdatesSetting = 0;
+let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevShowProgressUpdatesSetting = prevShowPreviewsSetting = 0;
 const count = {
   allTime: {
     photos: 0,
@@ -34,9 +35,11 @@ const count = {
   }
 };
 const failedMemories = [];
+let appVersion = undefined;
 
 ipcRenderer.on('message', (event, data) => {
   if (data.version) {
+    appVersion = data.version;
     document.getElementById('version').innerHTML = data.version;
   }
 
@@ -49,7 +52,7 @@ ipcRenderer.on('message', (event, data) => {
     progress.classList.remove('d-none');
   
       if (data.photos || data.videos) {
-        feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.totalMemories}&photos=${data.photos}&videos=${data.videos}`);
+        feedbackLink.setAttribute('href', `${feedbackUrl}&memoryTotal=${data.totalMemories}&photos=${data.photos}&videos=${data.videos}&version=${appVersion}`);
       }
       
       total = data.totalMemories;
@@ -245,58 +248,73 @@ const reEnableNavButton = () => {
 };
 
 const updateOptions = (option) => {
-  if (photosOption.checked && videosOption.checked) {
-    if (option === 'concurrent') {
-      if (concurrentOption.checked) {
-        progressUpdatesOption.checked = prevProgressUpdatesSetting;
-        progressUpdatesOption.removeAttribute('disabled');
-      }
-      else {
-        prevProgressUpdatesSetting = progressUpdatesOption.checked;
-        progressUpdatesOption.checked = false;
-        progressUpdatesOption.setAttribute('disabled', null);
-      }
-    
-      prevConcurrentSetting = concurrentOption.checked;
+  let isEnablingAdvancedOptions = false;
+  let isDisablingAdvancedOptions = false;
+
+  if (option === 'photos') {
+    if (photosOption.checked) {
+      videosOption.removeAttribute('disabled');
+      isEnablingAdvancedOptions = true;
     }
     else {
+      videosOption.setAttribute('disabled', null);
+      isDisablingAdvancedOptions = true;
+    }
+  }
+  else if (option === 'videos') {
+    if (videosOption.checked) {
       photosOption.removeAttribute('disabled');
-      videosOption.removeAttribute('disabled');
-      concurrentOption.removeAttribute('disabled');
+      isEnablingAdvancedOptions = photosOption.checked;
+    }
+    else {
+      photosOption.setAttribute('disabled', null);
+      isDisablingAdvancedOptions = true;
+    }
+  }
+  else if (option === 'concurrent') {
+    if (concurrentOption.checked) {
       progressUpdatesOption.removeAttribute('disabled');
-
-      concurrentOption.checked = prevConcurrentSetting;
-      progressUpdatesOption.checked = prevProgressUpdatesSetting;
+      progressUpdatesOption.checked = prevShowProgressUpdatesSetting;
+    }
+    else {
+      prevShowProgressUpdatesSetting = progressUpdatesOption.checked;
+      progressUpdatesOption.checked = false;
+      progressUpdatesOption.setAttribute('disabled', null);
     }
   }
 
-  if (!photosOption.checked) {
-    prevConcurrentSetting = concurrentOption.checked;
-    prevProgressUpdatesSetting = progressUpdatesOption.checked;
-    
-    concurrentOption.checked = false;
-    progressUpdatesOption.checked = false;
+  if (isEnablingAdvancedOptions) {
+    showPreviewsOption.removeAttribute('disabled');
 
-    concurrentOption.setAttribute('disabled', null);
-    progressUpdatesOption.setAttribute('disabled', null);
-    videosOption.setAttribute('disabled', null);
-  }
+    if (videosOption.checked) {
+      concurrentOption.removeAttribute('disabled');
+      progressUpdatesOption.removeAttribute('disabled');
   
-  if (!videosOption.checked) {
+      showPreviewsOption.checked = prevShowPreviewsSetting;
+      concurrentOption.checked = prevConcurrentSetting;
+      progressUpdatesOption.checked = prevShowProgressUpdatesSetting;
+    }
+  }
+  else if (isDisablingAdvancedOptions) {
+    prevShowPreviewsSetting = showPreviewsOption.checked;
     prevConcurrentSetting = concurrentOption.checked;
-    prevProgressUpdatesSetting = progressUpdatesOption.checked;
-    
-    concurrentOption.checked = false;
-    progressUpdatesOption.checked = false;
+    prevShowProgressUpdatesSetting = progressUpdatesOption.checked;
 
+    if (!photosOption.checked) {
+      showPreviewsOption.checked = false;
+      showPreviewsOption.setAttribute('disabled', null);
+    }
+
+    concurrentOption.checked = false;
     concurrentOption.setAttribute('disabled', null);
+    
+    progressUpdatesOption.checked = false;
     progressUpdatesOption.setAttribute('disabled', null);
-    photosOption.setAttribute('disabled', null);
   }
 };
 
 const handlePreviewFile = (data) => {
-  if (data.type === 'photo') {
+  if (data.type === 'photo' && showPreviewsOption.checked) {
     preview.classList.remove('d-none');
     photoPreview.setAttribute('src', data.file);
   }
