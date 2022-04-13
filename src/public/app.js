@@ -25,7 +25,7 @@ const progressUpdatesOption = document.querySelector('form [name="progress-updat
 const feedbackLink = document.getElementById('feedback-link');
 const startOverLink = document.getElementById('start-over');
 
-const feedbackUrl = 'http://www.christianlisle.com/contact?memoryDownload=true';
+const feedbackUrl = 'http://www.christianlisle.io/contact?memoryDownload=true';
 
 let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevShowProgressUpdatesSetting = prevShowPreviewsSetting = 0;
 const count = {
