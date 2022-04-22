@@ -1,10 +1,8 @@
 # Download Snapchat Memories
 
+Want a copy of all of your Snapchat memories? You're in the right place!
 
-
-Have you ever wanted to stop using the social media platform, Snapchat, but you remember that you have hundreds or even thousands of photos and videos stored in your memories?
-
-This project allows you to say goodbye to the service by downloading all of your memories to your computer (in regular `jpg` and `mp4` formats).
+This desktop application makes downloading all of your memories as simple as possible. The app downloads photos and videos in regular `jpg` and `mp4` formats.
 
 ### How to use
 
@@ -12,15 +10,16 @@ Download the application: [www.downloadmysnapchatmemories.com](http://www.downlo
 
 Watch a video tutorial [here](https://youtu.be/0_1mJ3w5LaA).
 
+Read a guide [here](https://www.christianlisle.io/post/download-snapchat-memories).
+
 <div align="center">
   <a href="http://www.downloadmysnapchatmemories.com" title="Download Snapchat Memories" >
-    <img src="assets/memory-download.png" width="700px" />
+    <img src="assets/memory-download-app.png" width="700px" />
   </a>
 </div>
 
 
-
-If you just want to use the app without complications, please follow [this tutorial](https://youtu.be/0_1mJ3w5LaA).
+If you want to use the app without complications, please follow [this tutorial](https://youtu.be/0_1mJ3w5LaA).
 ## App development 🤓
 
 ### Running the app in development mode
