@@ -4,9 +4,10 @@ const fileUpload = document.getElementById('file-input');
 const downloadLocationButton = document.getElementById('choose-download-location-button');
 const waitCard = document.getElementById('step-4');
 const progress = document.getElementById('percent');
+const progressBarNote = document.getElementById('progress-bar-note');
 const message = document.getElementById('message');
 const errorCard = document.getElementById('error-card');
-const errorText = document.getElementById('error-text');``
+const errorText = document.getElementById('error-text');
 const navButton = document.getElementById('nav-button');
 const progressBar = document.getElementById('progress-bar');
 const openMemories = document.getElementById('open-memories-button');
@@ -27,14 +28,14 @@ const startOverLink = document.getElementById('start-over');
 
 const feedbackUrl = 'http://www.christianlisle.io/contact?memoryDownload=true';
 
-let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevShowProgressUpdatesSetting = prevShowPreviewsSetting = 0;
+let step = photos = videos = total = downloadLocation = prevConcurrentSetting = prevShowProgressUpdatesSetting = prevShowPreviewsSetting = isReAttemptingFailedMemories = 0;
 const count = {
   allTime: {
     photos: 0,
     videos: 0
   }
 };
-const failedMemories = [];
+let failedMemories = [];
 let appVersion = undefined;
 
 ipcRenderer.on('message', (event, data) => {
@@ -59,7 +60,7 @@ ipcRenderer.on('message', (event, data) => {
       document.getElementById('total-memories').innerHTML = total;
   }
 
-  if (data.total) {
+  if (data.total && !isReAttemptingFailedMemories) {
     if (data.date?.year) {
       if (!count[data.date.year]) {
         count[data.date.year] = {
@@ -76,7 +77,7 @@ ipcRenderer.on('message', (event, data) => {
     }
   }
 
-  if (data.count) {
+  if (data.count && !isReAttemptingFailedMemories) {
     let currentCount = 0;
 
     if (concurrentOption.checked) {
@@ -150,8 +151,14 @@ ipcRenderer.on('message', (event, data) => {
     return;
   }
 
-  if (data.failedMemory) {
-    failedMemories.push(data.failedMemory);
+  if (data.isReAttemptingFailedMemories) {
+    isReAttemptingFailedMemories = true;
+    progressBarNote.innerHTML = '<em>The progress bar does not update for re-attempted downloads</em><br />';
+    progressBarNote.classList.remove('d-none');
+  }
+
+  if (data.failedMemories) {
+    failedMemories = data.failedMemories;
   }
 
   if (data.message) {
