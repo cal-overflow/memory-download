@@ -8,6 +8,7 @@ const progressBarNote = document.getElementById('progress-bar-note');
 const message = document.getElementById('message');
 const errorCard = document.getElementById('error-card');
 const errorText = document.getElementById('error-text');
+const expiredFileNote = document.getElementById('expired-file-note');
 const navButton = document.getElementById('nav-button');
 const progressBar = document.getElementById('progress-bar');
 const openMemories = document.getElementById('open-memories-button');
@@ -177,8 +178,9 @@ ipcRenderer.on('message', (event, data) => {
   if (data.isComplete) {
     if (total === failedMemories.length) {
       showErrorMessage({
-        message: 'The input file provided is expired<br />Be sure to use data from your Snapchat account that was downloaded within the last 7 days',
+        message: 'Either there is no internet connection or the input file provided is expired<br />Be sure to use data from your Snapchat account that was downloaded within the last 7 days',
       });
+      expiredFileNote.classList.remove('d-none');
     }
     else handleDownloadComplete(data);
   }
