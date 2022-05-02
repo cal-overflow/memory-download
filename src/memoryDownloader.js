@@ -11,6 +11,12 @@ const {
 
 const isDebugging = process.env.DEBUG_MODE;
 
+const failedMemories = {
+  photos: [],
+  videos: [],
+  reAttempted: []
+};
+
 const downloadMemories = async (filepath, outputDirectory, options, sendMessage) => {  
   initializeEnvironment(filepath, outputDirectory);
   
@@ -59,11 +65,11 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
     for (const year in sortedMemories) {
       if (sortedMemories[year].photos) {
         photoCount += sortedMemories[year].photos.length;
-        tasks.push(downloadPhotos(sortedMemories[year].photos, sendMessage));
+        tasks.push(downloadPhotos(sortedMemories[year].photos, failedMemories.photos, sendMessage));
       }
       if (sortedMemories[year].videos) {
         videoCount += sortedMemories[year].videos.length;
-        tasks.push(downloadVideos(sortedMemories[year].videos, sendMessage));
+        tasks.push(downloadVideos(sortedMemories[year].videos, failedMemories.videos, sendMessage));
       }
     }
 
@@ -80,6 +86,27 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
 
 
     await Promise.all(tasks);
+
+    if (failedMemories.photos.length || failedMemories.videos.length) {
+      if (!(failedMemories.photos.length === photoCount && failedMemories.videos.length === videoCount)) {
+        const reAttemptTasks = [];
+        if (isDebugging) console.log(`Re-attempting to download ${failedMemories.photos.length} photos and ${failedMemories.videos.length} videos`);
+        sendMessage({ isReAttemptingFailedMemories: true });
+    
+        if (failedMemories.photos.length) {
+          reAttemptTasks.push(downloadPhotos(failedMemories.photos, failedMemories.reAttempted, sendMessage));
+        }
+        if (failedMemories.videos.length) {
+          reAttemptTasks.push(downloadVideos(failedMemories.videos, failedMemories.reAttempted, sendMessage));
+        }
+        
+        sendMessage({message: `Re-attempting to download ${failedMemories.photos.length + failedMemories.videos.length} memories`});
+        await Promise.all(reAttemptTasks);
+      }
+      else {
+        failedMemories.reAttempted = failedMemories.photos.concat(failedMemories.videos);
+      }
+    }
   }
   else {
     let photos = [];
@@ -108,13 +135,37 @@ const downloadMemories = async (filepath, outputDirectory, options, sendMessage)
 
     if (options.photos) {
       sendMessage({message: 'Downloading photos'});
-      await downloadPhotos(photos, sendMessage);
+      await downloadPhotos(photos, failedMemories.photos, sendMessage);
     }
     
     if (options.videos) {
       sendMessage({message: 'Downloading videos'});
-      await downloadVideos(videos, sendMessage);
+      await downloadVideos(videos, failedMemories.videos, sendMessage);
     }
+
+    if (failedMemories.photos.length || failedMemories.videos.length) {
+      if (!(failedMemories.photos.length === photoCount && failedMemories.videos.length === videoCount)) {
+        if (isDebugging) console.log(`Re-attempting to download ${failedMemories.photos.length} photos and ${failedMemories.videos.length} videos`);
+        sendMessage({ isReAttemptingFailedMemories: true });
+    
+        if (failedMemories.photos.length) {
+          sendMessage({message: `Re-attempting to download ${failedMemories.photos.length} photos`});
+          await downloadPhotos(failedMemories.photos, failedMemories.reAttempted, sendMessage);
+        }
+
+        if (failedMemories.videos.length) {
+          sendMessage({message: `Re-attempting to download ${failedMemories.videos.length} videos`});
+          await downloadVideos(failedMemories.videos, failedMemories.reAttempted, sendMessage);
+        }
+      }
+      else {
+        failedMemories.reAttempted = failedMemories.photos.concat(failedMemories.videos);
+      }
+    }
+  }
+
+  if (failedMemories.reAttempted.length) {
+    sendMessage({ failedMemories: failedMemories.reAttempted });
   }
 
   const downloadInfo = await getOutputInfo();
