@@ -44,24 +44,25 @@ const checkVideoClip = (prev, cur) => {
   else return (times.prev.minute == 59 && times.cur.minute == 0);
 };
 
-const downloadPhotos = async (photos, sendMessage) => {
+const downloadPhotos = async (photos, failedMemories, sendMessage) => {
   const type = 'photo';
   const date = {};
-
   for (let i = 0; i < photos.length; i++) {
     const photo = photos[i];
 
-    const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, photo, sendMessage));
+    const res = await fetch(photo['Download Link'], {method: 'POST'}).catch((e) => fetchErrorHandler(e, photo, failedMemories));
     if (!res) continue;
     
     const url = await res.text();
-    const download = await fetch(url).catch((e) => fetchErrorHandler(e, photo, sendMessage));
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, photo, failedMemories));
     if (!download) continue;
 
     const fileName = await getFileName(photo);
 
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, photo);
+
+    removeFailedMemory(photo, failedMemories);
     
     handleUpdateMessages({
       memory: photo,
@@ -75,7 +76,7 @@ const downloadPhotos = async (photos, sendMessage) => {
   }
 };
 
-const downloadVideos = async (videos, sendMessage) => {
+const downloadVideos = async (videos, failedMemories, sendMessage) => {
   const type = 'video';
   const date = {};
   let prevMemory, fileName, prevUrl, prevFileName;
@@ -84,7 +85,7 @@ const downloadVideos = async (videos, sendMessage) => {
   for (let i = 0; i < videos.length; i++) {
     const video = videos[i];
 
-    const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, video, sendMessage));
+    const res = await fetch((video['Download Link']), {method: 'POST'}).catch((e) => fetchErrorHandler(e, video, failedMemories));
     if (!res) continue;
 
     const url = await res.text();
@@ -124,13 +125,15 @@ const downloadVideos = async (videos, sendMessage) => {
       .finally(() => clips = []);
     }
 
-    const download = await fetch(url).catch((e) => fetchErrorHandler(e, video, sendMessage));
+    const download = await fetch(url).catch((e) => fetchErrorHandler(e, video, failedMemories));
     if (!download) continue;
 
     fileName = await getFileName(video);
 
     await writeFile(fileName, download.body);
     updateFileMetadata(fileName, video);
+
+    removeFailedMemory(video, failedMemories);
 
     handleUpdateMessages({
       memory: video,
@@ -177,10 +180,18 @@ const handleUpdateMessages = ({ date, count, total, type, file, memory, sendMess
   }
 };
 
-const fetchErrorHandler = (err, memory, sendMessage) => {
+const fetchErrorHandler = (err, memory, failedMemories) => {
   if (isDebugging) console.log(`There was an issue fetching a memory. Error: ${err.message}`);
 
-  sendMessage({ failedMemory: memory });
+  failedMemories.push(memory);
+};
+
+const removeFailedMemory = (memory, failedMemories) => {
+  const index = failedMemories.findIndex((failedMemory) => failedMemory['Download Link'] === memory['Download Link'])
+
+  if (index > -1) {
+    failedMemories.splice(index, 1);
+  }
 };
 
 module.exports = { downloadPhotos, downloadVideos };
