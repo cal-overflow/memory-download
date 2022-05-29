@@ -60,7 +60,7 @@ const downloadPhotos = async (photos, failedMemories, sendMessage) => {
     const fileName = await getFileName(photo);
 
     await writeFile(fileName, download.body);
-    updateFileMetadata(fileName, photo);
+    await updateFileMetadata(fileName, photo);
 
     removeFailedMemory(photo, failedMemories);
     
@@ -103,8 +103,8 @@ const downloadVideos = async (videos, failedMemories, sendMessage) => {
       .clips(clips)
       .output(await getFileName(prevMemory, true))
       .concat()
-      .then((outputFile) => {
-        updateFileMetadata(outputFile, prevMemory);
+      .then(async (outputFile) => {
+        await updateFileMetadata(outputFile, prevMemory);
 
         for (const clip of clips)
           fs.rmSync(clip.fileName);
@@ -131,7 +131,7 @@ const downloadVideos = async (videos, failedMemories, sendMessage) => {
     fileName = await getFileName(video);
 
     await writeFile(fileName, download.body);
-    updateFileMetadata(fileName, video);
+    await updateFileMetadata(fileName, video);
 
     removeFailedMemory(video, failedMemories);
 

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const constants = require('./constants.js');
-const {updateExifData} = require("./exif");
+const { updateExifData } = require("./exif");
 
 const isDebugging = process.env.DEBUG_MODE;
 let outputDirectory;
@@ -61,7 +61,7 @@ const writeFile = async (file, data) => {
 const updateFileMetadata = (file, memory) => {
   const date = new Date(memory.Date);
   fs.utimes(file, date, date, () => {});
-  updateExifData(file, memory.Date);
+  return updateExifData(file, memory.Date);
 };
 
 const getOutputInfo = () => {
