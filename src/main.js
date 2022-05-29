@@ -1,6 +1,10 @@
 const path = require('path');
 const { app, BrowserWindow, shell, ipcMain, dialog } = require('electron');
 const { downloadMemories } = require('./memoryDownloader');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+
+dayjs.extend(utc);
 
 const isDebugging = process.env.DEBUG_MODE;
 let isProcessingMemories = false;
