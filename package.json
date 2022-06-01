@@ -36,6 +36,7 @@
     "electron": "^16.0.7",
     "electron-squirrel-startup": "^1.0.0",
     "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
     "prettier": "2.6.2"
   },
   "config": {
