@@ -12,12 +12,14 @@
   "scripts": {
     "dev": "DEBUG_MODE=true electron-forge start",
     "make": "electron-forge make",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
     "postversion": "echo $npm_package_version > docs/version",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier:check": "prettier check .",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
