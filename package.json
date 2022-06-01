@@ -16,7 +16,8 @@
     "lint:fix": "eslint . --fix",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
-    "postversion": "echo $npm_package_version > docs/version"
+    "postversion": "echo $npm_package_version > docs/version",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -37,6 +38,8 @@
     "electron-squirrel-startup": "^1.0.0",
     "eslint": "^8.16.0",
     "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^12.5.0",
     "prettier": "2.6.2"
   },
   "config": {
@@ -89,5 +92,13 @@
         }
       ]
     }
+  },
+  "lint-staged": {
+    "**/*.js": [
+      "eslint ."
+    ],
+    "**/*": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }
