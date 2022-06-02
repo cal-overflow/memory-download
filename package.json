@@ -14,7 +14,12 @@
     "make": "electron-forge make",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
-    "postversion": "echo $npm_package_version > docs/version"
+    "postversion": "echo $npm_package_version > docs/version",
+    "prepare": "husky install",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prettier:check": "prettier check .",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -32,7 +37,12 @@
     "@electron-forge/maker-zip": "^6.0.0-beta.63",
     "@electron-forge/publisher-github": "^6.0.0-beta.63",
     "electron": "^16.0.7",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^12.5.0",
+    "prettier": "2.6.2"
   },
   "config": {
     "forge": {
@@ -84,5 +94,13 @@
         }
       ]
     }
+  },
+  "lint-staged": {
+    "**/*.js": [
+      "eslint ."
+    ],
+    "**/*": [
+      "prettier --write --ignore-unknown"
+    ]
   }
 }
