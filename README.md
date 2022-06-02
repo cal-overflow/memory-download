@@ -18,14 +18,16 @@ Read a guide [here](https://www.christianlisle.io/post/download-snapchat-memorie
   </a>
 </div>
 
-
 If you want to use the app without complications, please follow [this tutorial](https://youtu.be/0_1mJ3w5LaA).
+
 ## App development 🤓
 
 ### Running the app in development mode
+
 <!-- no toc -->
 
 #### System requirements
+
 1. [NodeJS](http://nodejs.org) (v17.1.0)
 2. [npm](http://npmjs.com)
 3. [nvm](http://nvm.sh/)
@@ -45,6 +47,7 @@ npm i
 ```
 
 Run the [electron](https://www.electronjs.org/) desktop application in development mode
+
 ```bash
 npm run dev
 ```

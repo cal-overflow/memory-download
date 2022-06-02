@@ -3,7 +3,7 @@
   filter: invert(100%);
 }
 .bg-snap-yellow {
-  background-color: #FFFC00;
+  background-color: #fffc00;
 }
 tt {
   background-color: rgb(50, 50, 50);
@@ -14,7 +14,8 @@ tt {
 .btn {
   border-radius: 3px;
 }
-.btn:hover, .btn:focus {
+.btn:hover,
+.btn:focus {
   outline: none;
   box-shadow: none;
 }
@@ -28,7 +29,8 @@ a.disabled {
 #preview {
   height: 30vh;
 }
-#preview img, #preview video {
+#preview img,
+#preview video {
   cursor: zoom-in;
 }
 .min-w-33 {
