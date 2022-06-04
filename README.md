@@ -56,4 +56,4 @@ An electron application will open in development mode. Follow the steps provided
 
 ### Contributing
 
-See [contributing.md](/contributing.md) for information regarding contributions.
+See [the contributing document](/CONTRIBUTING.md) for information regarding contributions.

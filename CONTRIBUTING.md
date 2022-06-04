@@ -1,14 +1,16 @@
-## Contributing 👥
+# Contributing 👥
 
 <!--toc-->
 
-- [Tech stack](#tech-stack)
-- [Project structure](#project-structure)
+- [Tech stack](#tech-stack-%EF%B8%8F)
+- [Project structure](#project-structure-)
   - [`src/`](#src)
   - [`src/public/`](#srcpublic)
   - [`src/services/`](#srcservices)
   - [`docs/`](#docs)
-- [Creating a contributor entry](#create-a-contributor-entry)
+- [Requirements](#requirements-)
+  - [Version bumping](#version-bumping)
+  - [Creating a contributor entry](#create-a-contributor-entry-)
 
 ## Tech stack ⚛️
 
@@ -35,6 +37,10 @@ Many of the helpful services (i.e., [download services](/src/services/downloadSe
 ### `docs/`
 
 Contents in this directory are served via the download website, [downloadmysnapchatmemories.com](http://www.downloadmysnapchatmemories.com).
+
+## Requirements ✅
+
+When contributing, ensure you are working to close an issue on the repository. You can choose a pre-existing issue that is not being apparently worked on by anyone else. You may also create and request to be assigned to a new issue.
 
 ### Version bumping
 
