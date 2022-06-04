@@ -92,3 +92,11 @@ jobs:
             -cvf /home/runner/work/_temp/artifact.tar \
             --exclude=.git \
             .
+    - name: Upload artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: github-pages  
+        path: /home/runner/work/_temp/artifact.tar
+        retention-days: 1
+        if-no-files-found: warn
+    
