@@ -77,6 +77,10 @@ jobs:
   deploy_website:
     # needs: [publish_on_linux, publish_on_mac, publish_on_win]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
     - uses: actions/checkout@v2
     - name: Upload docs
