@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
     - uses: actions/setup-node@master
       with:
         node-version: "17.1.0"
@@ -24,7 +23,7 @@ jobs:
 
     - name: Push tag
       run: |
-        tag = "v${{ steps.get-version.outputs.app_version }}"
+        tag="v${{ steps.get-version.outputs.app_version }}"
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
         git tag "${tag}"
