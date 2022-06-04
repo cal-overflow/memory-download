@@ -73,3 +73,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run publish
+
+  deploy_website:
+    needs: [publish_on_linux, publish_on_mac, publish_on_win]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy GitHub pages
+      uses: peaceiris/actions-gh-pages@v3.6.1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
