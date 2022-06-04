@@ -6,76 +6,76 @@ on:
       - contributions # TODO: remove
 
 jobs:
-  create_tag:
-    environment: production
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@master
-      with:
-        node-version: "17.1.0"
-    - name: install dependencies
-      run: npm install
+  # create_tag:
+  #   environment: production
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+  #   - uses: actions/setup-node@master
+  #     with:
+  #       node-version: "17.1.0"
+  #   - name: install dependencies
+  #     run: npm install
     
-    - name: Get version
-      id: get-version
-      run: echo ::set-output name=app_version::$(cat package.json | jq -r '.version')
+  #   - name: Get version
+  #     id: get-version
+  #     run: echo ::set-output name=app_version::$(cat package.json | jq -r '.version')
 
-    - name: Push tag
-      run: |
-        tag="v${{ steps.get-version.outputs.app_version }}"
-        git config user.name "${GITHUB_ACTOR}"
-        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git tag "${tag}"
-        git push origin "${tag}"
+  #   - name: Push tag
+  #     run: |
+  #       tag="v${{ steps.get-version.outputs.app_version }}"
+  #       git config user.name "${GITHUB_ACTOR}"
+  #       git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+  #       git tag "${tag}"
+  #       git push origin "${tag}"
 
-  publish_on_linux:
-    needs: create_tag
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@master
-        with:
-          node-version: "17.1.0"
-      - name: install dependencies
-        run: npm install
-      - name: publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+  # publish_on_linux:
+  #   needs: create_tag
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@master
+  #       with:
+  #         node-version: "17.1.0"
+  #     - name: install dependencies
+  #       run: npm install
+  #     - name: publish
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: npm run publish
 
-  publish_on_mac:
-    needs: create_tag
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@master
-        with:
-          node-version: "17.1.0"
-      - name: install dependencies
-        run: npm install
-      - name: publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+  # publish_on_mac:
+  #   needs: create_tag
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@master
+  #       with:
+  #         node-version: "17.1.0"
+  #     - name: install dependencies
+  #       run: npm install
+  #     - name: publish
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: npm run publish
 
-  publish_on_win:
-    needs: create_tag
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@master
-        with:
-          node-version: "17.1.0"
-      - name: install dependencies
-        run: npm install
-      - name: publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run publish
+  # publish_on_win:
+  #   needs: create_tag
+  #   runs-on: windows-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@master
+  #       with:
+  #         node-version: "17.1.0"
+  #     - name: install dependencies
+  #       run: npm install
+  #     - name: publish
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: npm run publish
 
   deploy_website:
-    needs: [publish_on_linux, publish_on_mac, publish_on_win]
+    # needs: [publish_on_linux, publish_on_mac, publish_on_win]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -84,10 +84,10 @@ jobs:
       with:
         path: ./docs
         retention-days: 1
-    - name: Compress bundle
+    - name: Compress artifact
       run: |
           tar \
-          --dereference --hard-dereference \
-          --directory ./docs \
-          -cvf /home/runner/work/_temp/artifact.tar \
-          --exclude=.git \
+            --dereference --hard-dereference \
+            --directory ./docs \
+            -cvf /home/runner/work/_temp/artifact.tar \
+            --exclude=.git \
