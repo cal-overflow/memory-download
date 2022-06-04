@@ -107,6 +107,7 @@ jobs:
         retention-days: 1
         if-no-files-found: warn
     - name: Deploy artifact
+      id: deployment
       uses: actions/deploy-pages@v1
       with:
         emit_telemetry: false
