@@ -78,9 +78,16 @@ jobs:
     needs: [publish_on_linux, publish_on_mac, publish_on_win]
     runs-on: ubuntu-latest
     steps:
-    - name: Deploy GitHub pages
-      uses: peaceiris/actions-gh-pages@v3.6.1
+    - uses: actions/checkout@v2
+    - name: Upload docs
+      uses: actions/upload-pages-artifact@v0
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: master
-        publish_dir: ./docs
+        path: ./docs
+        retention-days: 1
+    - name: Compress bundle
+      run: |
+          tar \
+          --dereference --hard-dereference \
+          --directory ./docs \
+          -cvf /home/runner/work/_temp/artifact.tar \
+          --exclude=.git \
