@@ -26,3 +26,12 @@ a.disabled {
   pointer-events: none;
   cursor: default;
 }
+
+#contributorsContainer {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.contributor {
+  border-bottom: black 1px solid;
+}

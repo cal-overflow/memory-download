@@ -27,9 +27,12 @@
         <h4>Download all of your Snapchat memories with ease</h4>
       </div>
 
-      <div class="container-md px-5 pb-4 min-vh-50" style="min-height: 40vh">
+      <div class="px-5 pb-4 min-vh-50" style="min-height: 40vh">
         <h2 class="text-center">Contributors</h2>
-        <div id="contributorsContainer" class="d-flex justify-content-center">
+        <div
+          id="contributorsContainer"
+          class="d-flex flex-wrap justify-content-center"
+        >
           <div
             id="loading-spinner"
             class="spinner-border spinner-border-xl"
@@ -55,7 +58,6 @@
         <p class="text-center">
           <a
             href="http://www.downloadmysnapchatmemories.com"
-            target="_blank"
             class="text-light text-decoration-none"
             >Home</a
           >
@@ -80,10 +82,10 @@
     for (const contributor of contributors) {
       const contributorElement = document.createElement('div');
 
-      contributorElement.classList.add('contributor', 'p-4', 'm-1');
+      contributorElement.classList.add('contributor', 'p-4', 'm-1', 'w-100');
 
       const mainInfoElement = document.createElement('div');
-      mainInfoElement.classList.add('d-flex', 'w-100', 'justify-content-between');
+      mainInfoElement.classList.add('d-sm-flex', 'w-100', 'justify-content-between');
 
       const contributorNameElement = document.createElement('h4');
       contributorNameElement.classList.add('mb-1');
