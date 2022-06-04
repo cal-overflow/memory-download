@@ -99,4 +99,12 @@ jobs:
         path: /home/runner/work/_temp/artifact.tar
         retention-days: 1
         if-no-files-found: warn
+    - name: Deploy artifact
+      uses: actions/deploy-pages@v1
+      with:
+        emit_telemetry: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        timeout: 600000
+        error_count: 10
+        reporting_interval: 5000
     
