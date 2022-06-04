@@ -24,9 +24,10 @@ jobs:
 
     - name: Push tag
       run: |
+        tag = "v${{ steps.get-version.outputs.app_version }}"
         git config user.name "${GITHUB_ACTOR}"
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-        git tag "v${{ steps.get-version.outputs.app_version }}"
+        git tag "${tag}"
         git push origin "${tag}"
 
   publish_on_linux:
