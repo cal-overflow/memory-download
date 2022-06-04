@@ -91,3 +91,4 @@ jobs:
             --directory ./docs \
             -cvf /home/runner/work/_temp/artifact.tar \
             --exclude=.git \
+            .
