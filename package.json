@@ -14,7 +14,7 @@
     "make": "electron-forge make",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
-    "postversion": "echo $npm_package_version > docs/version",
+    "postversion": "echo $npm_package_version > docs/version && git add docs/version && git commit -m 'Version bump docs reference'",
     "prepare": "husky install",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
