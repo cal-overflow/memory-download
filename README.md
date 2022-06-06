@@ -53,3 +53,7 @@ npm run dev
 ```
 
 An electron application will open in development mode. Follow the steps provided by the simple user-interface to download your Snapchat memories.
+
+### Contributing
+
+See [the contributing document](/CONTRIBUTING.md) for information regarding contributions.
