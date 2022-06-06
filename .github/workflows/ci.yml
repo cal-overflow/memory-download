@@ -1,0 +1,117 @@
+name: Build and Deploy
+on: 
+  push:
+    branches:
+      - master
+
+jobs:
+  create_tag:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@master
+      with:
+        node-version: "17.1.0"
+    - name: install dependencies
+      run: npm install
+    
+    - name: Get version
+      id: get-version
+      run: echo ::set-output name=app_version::$(cat package.json | jq -r '.version')
+
+    - name: Push tag
+      run: |
+        tag="v${{ steps.get-version.outputs.app_version }}"
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git tag "${tag}"
+        git push origin "${tag}"
+
+  publish_on_linux:
+    needs: create_tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: "17.1.0"
+      - name: install dependencies
+        run: npm install
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
+
+  publish_on_mac:
+    needs: create_tag
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: "17.1.0"
+      - name: install dependencies
+        run: npm install
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
+
+  publish_on_win:
+    needs: create_tag
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@master
+        with:
+          node-version: "17.1.0"
+      - name: install dependencies
+        run: npm install
+      - name: publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run publish
+
+  deploy_website:
+    needs: [publish_on_linux, publish_on_mac, publish_on_win]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Upload docs
+      uses: actions/upload-pages-artifact@v0
+      with:
+        path: ./docs
+        retention-days: 1
+    - name: Compress artifact
+      run: |
+          tar \
+            --dereference --hard-dereference \
+            --directory ./docs \
+            -cvf /home/runner/work/_temp/artifact.tar \
+            --exclude=.git \
+            .
+    - name: Upload artifact
+      uses: actions/upload-artifact@main
+      with:
+        name: github-pages  
+        path: /home/runner/work/_temp/artifact.tar
+        retention-days: 1
+        if-no-files-found: warn
+    - name: Deploy artifact
+      id: deployment
+      uses: actions/deploy-pages@v1
+      with:
+        emit_telemetry: false
+        token: ${{ secrets.GITHUB_TOKEN }}
+        timeout: 600000
+        error_count: 10
+        reporting_interval: 5000
+    
