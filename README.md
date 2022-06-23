@@ -10,7 +10,7 @@ Download the application: [www.downloadmysnapchatmemories.com](http://www.downlo
 
 Watch a video tutorial [here](https://youtu.be/0_1mJ3w5LaA).
 
-Read a guide [here](https://www.christianlisle.io/post/download-snapchat-memories).
+Read a guide [here](https://www.cal-overflow.dev/post/download-snapchat-memories).
 
 <div align="center">
   <a href="http://www.downloadmysnapchatmemories.com" title="Download Snapchat Memories" >

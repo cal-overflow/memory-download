@@ -1,12 +1,12 @@
 {
   "name": "memory-download",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Desktop application for downloading your Snapchat memories.",
   "license": "UNLICENSED",
   "author": {
     "name": "Christan Lisle",
     "email": "lisleachristian@gmail.com",
-    "url": "https://www.christianlisle.io"
+    "url": "https://www.cal-overflow.dev"
   },
   "main": "src/main.js",
   "scripts": {
