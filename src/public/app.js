@@ -31,7 +31,7 @@ const progressUpdatesOption = document.querySelector(
 const feedbackLink = document.getElementById("feedback-link");
 const startOverLink = document.getElementById("start-over");
 
-const feedbackUrl = "http://www.christianlisle.io/contact?memoryDownload=true";
+const feedbackUrl = "http://www.cal-overflow.dev/contact?memoryDownload=true";
 let appVersion = undefined;
 
 let step = 0;
