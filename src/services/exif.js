@@ -5,7 +5,11 @@ const dayjs = require("dayjs");
 
 const exiftool = new ExifTool({});
 
-const updateExifData = async (fileName, creationDateTimeString) => {
+const updateExifData = async (
+  fileName,
+  creationDateTimeString,
+  geolocationData
+) => {
   const extension = extname(fileName);
   if (extension === ".mp4") {
     // mp4 files are not supported by exiftool
@@ -16,6 +20,8 @@ const updateExifData = async (fileName, creationDateTimeString) => {
     .format("YYYY:MM:DD HH:mm:ss");
   await exiftool.write(fileName, {
     DateTimeOriginal: exifFormattedDate,
+    GPSLatitude: geolocationData.latitude,
+    GPSLongitude: geolocationData.longitude,
   });
   await unlink(`${fileName}_original`);
 };
