@@ -70,7 +70,16 @@ const writeFile = async (file, data) => {
 const updateFileMetadata = (file, memory) => {
   const date = new Date(memory.Date);
   fs.utimes(file, date, date, () => {});
-  return updateExifData(file, memory.Date);
+
+  // parse latitude and longitude 'x, y' from `Latitude, Longitude: x, y` string
+  const geolocationString = memory.Location.split(": ")[1];
+  const [latitude, longitude] = geolocationString.split(", ");
+  const geolocationData = {
+    latitude: parseFloat(latitude),
+    longitude: parseFloat(longitude),
+  };
+
+  return updateExifData(file, memory.Date, geolocationData);
 };
 
 const getOutputInfo = () => {
