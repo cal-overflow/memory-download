@@ -64,7 +64,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Comment: !Sub 'A CloudFront distribution for the static frontend hosted in the ${S3Bucket} bucket.'
+        Comment: !Sub 'For the website hosted in the ${S3Bucket} bucket.'
         Aliases: 
           - !Ref Domain
           - !Sub 'www.${Domain}'
