@@ -4,10 +4,6 @@ on:
     branches:
       - master
 
-permissions:
-  id-token: write
-  contents: read
-
 env:
   AWS_REGION: us-east-1
 
@@ -83,6 +79,9 @@ jobs:
   deploy_website:
     needs: [publish_on_linux, publish_on_mac, publish_on_win]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - name: Checkout 🛎
         uses: actions/checkout@master
