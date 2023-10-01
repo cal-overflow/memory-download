@@ -98,5 +98,5 @@ jobs:
 
       - name: Upload website content
         run: |
-          BUCKET=$(aws cloudformation describe-stacks --stack-name=$AWS_STACK_NAME --region $REGION --query 'Stacks[0].Outputs[?OutputKey==`S3BucketName`].OutputValue' --output text)
+          BUCKET=$(aws cloudformation describe-stacks --stack-name=$AWS_STACK_NAME --region $AWS_REGION --query 'Stacks[0].Outputs[?OutputKey==`S3BucketName`].OutputValue' --output text)
           aws s3 sync docs s3://$BUCKET
