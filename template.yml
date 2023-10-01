@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "AWS resources for a static website with a custom domain"
+
+Parameters:
+  Domain:
+    Type: String
+    Default: downloadmysnapchatmemories.com
+
+  HostedZone:
+    Type: String
+    Default: downloadmysnapchatmemories.com.
+    Description: The hosted zone in which the domain belongs
+
+  CachePolicyId:
+    Type: String
+    Default: 658327ea-f89d-4fab-a63d-7e88639e58f6 # id for the caching optimized policy
+    # See more policies at https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-policies-list
+
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: "index.html"
+        ErrorDocument: "index.html"
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Action: [ 's3:GetObject', 's3:ListBucket' ]
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Resource: 
+              - !Sub 'arn:aws:s3:::${S3Bucket}'
+              - !Sub 'arn:aws:s3:::${S3Bucket}/*'
+          
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub '${AWS::StackName}-origin-access-control'
+        Description: !Sub 'Origin access control for ${S3Bucket.DomainName}'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+  
+  # Note that these ACM Certificate resources will be stuck in creation until the DNS validation is completed
+  # https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html#setting-up-dns-validation
+  ACMCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref Domain
+      SubjectAlternativeNames: [ !Sub '*.${Domain}' ]
+      ValidationMethod: DNS
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub 'A CloudFront distribution for the static frontend hosted in the ${S3Bucket} bucket.'
+        Aliases: 
+          - !Ref Domain
+          - !Sub 'www.${Domain}'
+        DefaultCacheBehavior:
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachePolicyId: !Ref CachePolicyId
+          TargetOriginId: !Sub 's3-origin-${S3Bucket}'
+          Compress: true
+        Enabled: true
+        DefaultRootObject: index.html
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: "/index.html"
+        Origins:
+        - DomainName: !GetAtt S3Bucket.DomainName
+          Id: !Sub 's3-origin-${S3Bucket}'
+          OriginAccessControlId: !GetAtt CloudFrontOriginAccessControl.Id
+          S3OriginConfig: # Necessary for cloudfront to work with s3 even though OAI is not being used
+            OriginAccessIdentity: ''
+        ViewerCertificate:
+          AcmCertificateArn: !Ref ACMCertificate
+          MinimumProtocolVersion: TLSv1
+          SslSupportMethod: sni-only
+
+  DNSRecords:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      Comment: DNS Record for pointing to CloudFront Distribution
+      HostedZoneName: !Ref HostedZone
+      RecordSets:
+        - Name: !Ref Domain
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt CloudFrontDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2 # Static hosted zone id when creating alias records to cloudfront distributions.
+        - Name: !Sub 'www.${Domain}'
+          Type: A
+          AliasTarget:
+            DNSName: !GetAtt CloudFrontDistribution.DomainName
+            HostedZoneId: Z2FDTNDATAQYW2 # Static hosted zone id when creating alias records to cloudfront distributions.
+
+
+Outputs:
+  S3BucketName:
+    Value: !Ref S3Bucket
+    Description: The name of the stacks S3 bucket where the static site is hosted.
+  
+  CloudFrontDistributionId:
+    Value: !Ref CloudFrontDistribution
+    Description: The Id of the CloudFront Distribution
+
