@@ -1,7 +1,7 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = downloadmysnapchatmemories-dot-com
+stack_name = "downloadmysnapchatmemories-dot-com"
 confirm_changeset = false
 fail_on_empty_changeset = false
 capabilities = []
