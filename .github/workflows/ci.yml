@@ -4,6 +4,13 @@ on:
     branches:
       - master
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   create_tag:
     environment: production
@@ -75,43 +82,23 @@ jobs:
 
   deploy_website:
     needs: [publish_on_linux, publish_on_mac, publish_on_win]
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Upload docs
-      uses: actions/upload-pages-artifact@v0
-      with:
-        path: ./docs
-        retention-days: 1
-    - name: Compress artifact
-      run: |
-          tar \
-            --dereference --hard-dereference \
-            --directory ./docs \
-            -cvf /home/runner/work/_temp/artifact.tar \
-            --exclude=.git \
-            .
-    - name: Upload artifact
-      uses: actions/upload-artifact@main
-      with:
-        name: github-pages  
-        path: /home/runner/work/_temp/artifact.tar
-        retention-days: 1
-        if-no-files-found: warn
-    - name: Deploy artifact
-      id: deployment
-      uses: actions/deploy-pages@v1
-      with:
-        emit_telemetry: false
-        token: ${{ secrets.GITHUB_TOKEN }}
-        timeout: 600000
-        error_count: 10
-        reporting_interval: 5000
-    
+      - name: Checkout 🛎
+        uses: actions/checkout@master
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ secrets.IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+        
+      - name: Deploy CloudFormation stack
+        run: sam deploy
+
+      - name: Upload website content
+        run: |
+          sam deploy --config-file ./samconfig.toml --region $AWS_REGION
+
+          BUCKET=$(aws cloudformation describe-stacks --stack-name=$STACK_NAME --region $REGION --query 'Stacks[0].Outputs[?OutputKey==`S3BucketName`].OutputValue' --output text)
+          aws s3 sync docs s3://$BUCKET
